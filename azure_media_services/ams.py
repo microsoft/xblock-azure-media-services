@@ -65,6 +65,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings
     )
 
+    # These are what become visible in the Mixin editor
     editable_fields = (
         'display_name', 'video_url', 'verification_key', 'protection_type'
     )
