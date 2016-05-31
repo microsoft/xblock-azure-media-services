@@ -47,6 +47,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default="",
         scope=Scope.settings
     )
+    # Ultimately this should come via some secure means, but this is OK for a PoC
     verification_key = String(
         display_name=_("Verification Key"),
         help=_(
