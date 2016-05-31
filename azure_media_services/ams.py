@@ -1,5 +1,7 @@
 """
 XBlock to allow for video playback from Amazon Media Services
+
+Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.html
 """
 
 import logging
