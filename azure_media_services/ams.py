@@ -14,7 +14,7 @@ from uuid import uuid4
 from .utils import _
 
 from xblock.core import String, Scope, List, XBlock
-from xblock.fields import Boolean, Float, Integer
+from xblock.fields import Boolean, Float, Integer, Dict
 from xblock.fragment import Fragment
 from xblock.validation import ValidationMessage
 
@@ -64,10 +64,16 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default="",
         scope=Scope.settings
     )
+    captions = List(
+        display_name=_("Captions"),
+        help=_("A list of caption definitions"),
+        scope=Scope.settings
+    )
+
 
     # These are what become visible in the Mixin editor
     editable_fields = (
-        'display_name', 'video_url', 'verification_key', 'protection_type'
+        'display_name', 'video_url', 'verification_key', 'protection_type', 'captions'
     )
 
     def _get_context_for_template(self):
@@ -77,6 +83,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         context = {
             "video_url": self.video_url,
             "protection_type": self.protection_type,
+            "captions": self.captions,
             # this is only for the HTML DOM id of the player element, it can change
             # we make a random one for now so that multiple players can live on the same page
             "player_dom_id": uuid4().hex
@@ -90,6 +97,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
             payload = {
                 # @TODO change claims to something sensible
+                # Should the claims be fixed or configurable?
                 u"iss": u"http://www.mpd-test.com/",
                 u"aud": u"urn:mpd-test",
                 u"exp": int(time.time()) + 600,
@@ -136,6 +144,9 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 context
             )
         )
+
+        # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
+        # print out an error msg in view rather than just silently failing
 
         fragment.initialize_js('AzureMediaServicesBlock')
         return fragment

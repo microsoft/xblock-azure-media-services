@@ -22,7 +22,23 @@ function AzureMediaServicesBlock(runtime, element) {
             }]
 % endif
         },
-    ]);
+    ]
+% if captions:
+    ,[
+    % for caption in captions:
+        {
+            src: "${caption['src']}",
+            srclang: "${caption['srclang']}",
+            kind: "subtitles",
+            label: "${caption['label']}"
+        }
+        % if loop.index < len(captions) - 1:
+        ,
+        % endif
+    % endfor
+    ]
+% endif
+    );
 
     // Add event handlers
 
