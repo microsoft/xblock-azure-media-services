@@ -8,7 +8,6 @@ function AzureMediaServicesBlock(runtime, element) {
     };
 
     var myPlayer = amp("${player_dom_id}", myOptions, function () {
-        //'this' refers to the player instance in the ready function
     });
 
     // This will get filled in by the transcript processor
@@ -169,11 +168,16 @@ function initTranscript(player, transcript, transcriptPaneEl) {
 
 
 function _syncTimer(myPlayer, transcript_cues) {
-    var currentTime = myPlayer.currentTime();
+    // This is called regularly while the video plays
+    // so that we can correctly highlight the transcript elements
+    // based on the current position of the video playback
 
     if (transcript_cues === null) {
+        // no transcript - quick exit
         return;
     }
+
+    var currentTime = myPlayer.currentTime();
 
     // see if there is a match
     for (var i=0;i<transcript_cues.length; i++) {
@@ -191,7 +195,8 @@ function _syncTimer(myPlayer, transcript_cues) {
         }
     }
 
-    // clear all
+    // clear all - video is not currently at a point which has a current
+    // translation
     $('.azure-media-xblock-transcript-element').removeClass('active');
 
 }
@@ -199,9 +204,11 @@ function _syncTimer(myPlayer, transcript_cues) {
 function _sendPlayerEvent(eventPostUrl, name, data) {
     data['event_type'] = name;
 
+    // @TODO: Remove this debugging stuff
     console.log('Event: ' + name)
     console.log(data)
 
+    // send events back to server-side xBlock
     $.ajax({
         type: "POST",
         url: eventPostUrl,
