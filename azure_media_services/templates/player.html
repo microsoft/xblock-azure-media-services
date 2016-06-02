@@ -1,5 +1,8 @@
 <div class='azure-media-services-xblock'>
-    <div class='azure-media-player'>
+<%
+    floating_class = ' floating' if transcript_url else ''
+%>
+    <div class='azure-media-player${floating_class}'>
         <video id="${player_dom_id}" class="azuremediaplayer amp-default-skin amp-big-play-centered"></video>
     </div>
 % if transcript_url:

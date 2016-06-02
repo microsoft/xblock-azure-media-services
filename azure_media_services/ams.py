@@ -153,9 +153,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/player.css'))
 
-        # for transcript processing
-        if self.transcript_url:
-            fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/vtt.js'))
+        # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
+        # actually need to include our local copy of public/js/vendor/vtt.js. In fact, if we do
+        # the overlay subtitles stop working
+
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing
