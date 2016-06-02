@@ -1,6 +1,7 @@
 function AzureMediaServicesBlock(runtime, element) {
     var myOptions = {
         autoplay: false,
+        logo: {enabled: false},
         controls: true,
         width: "550",
         height: "343",
