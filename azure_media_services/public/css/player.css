@@ -2,8 +2,17 @@
     float: left;
 }
 
+ul.azure-media-xblock-transcript-cues {
+    list-style: none !important;
+    padding-left: 0 !important;
+}
+
+li.azure-media-xblock-transcript-cue {
+    margin-bottom: 0.25em !important;
+}
+
 .azure-media-player-transcript-pane {
-    padding-left: 20px;
+    padding-left: 10px;
     height: 340px;
     overflow-y: auto;
 }

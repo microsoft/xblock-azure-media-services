@@ -7,13 +7,13 @@ function AzureMediaServicesBlock(runtime, element) {
         poster: ""
     };
 
-    var myPlayer = amp("${player_dom_id}", myOptions, function () {
+    var player = amp("${player_dom_id}", myOptions, function () {
     });
 
     // This will get filled in by the transcript processor
     var transcript_cues = null;
 
-    myPlayer.src([
+    player.src([
         {
             src: "${video_url}",
             type: "application/vnd.ms-sstr+xml",
@@ -48,7 +48,7 @@ function AzureMediaServicesBlock(runtime, element) {
 
     var timeHandler = null;
 
-    myPlayer.addEventListener(amp.eventName.pause,
+    player.addEventListener(amp.eventName.pause,
         function(evt){
             _sendPlayerEvent(
                 eventPostUrl,
@@ -62,7 +62,7 @@ function AzureMediaServicesBlock(runtime, element) {
     );
 
 
-    myPlayer.addEventListener(amp.eventName.play,
+    player.addEventListener(amp.eventName.play,
         function(evt) {
             _sendPlayerEvent(
                 eventPostUrl,
@@ -71,14 +71,14 @@ function AzureMediaServicesBlock(runtime, element) {
             );
             timeHandler = setInterval(
                 function() {
-                    _syncTimer(myPlayer, transcript_cues);
+                    _syncTimer(player, transcript_cues);
                 },
                 100
             );
         }
     );
 
-    myPlayer.addEventListener(amp.eventName.loadeddata,
+    player.addEventListener(amp.eventName.loadeddata,
         function(evt) {
             _sendPlayerEvent(
                 eventPostUrl,
@@ -88,7 +88,7 @@ function AzureMediaServicesBlock(runtime, element) {
         }
     );
 
-    myPlayer.addEventListener(amp.eventName.seeked,
+    player.addEventListener(amp.eventName.seeked,
         function(evt) {
             _sendPlayerEvent(
                 eventPostUrl,
@@ -98,7 +98,7 @@ function AzureMediaServicesBlock(runtime, element) {
         }
     );
 
-    myPlayer.addEventListener(amp.eventName.ended,
+    player.addEventListener(amp.eventName.ended,
         function(evt) {
             _sendPlayerEvent(
                 eventPostUrl,
@@ -119,7 +119,7 @@ function AzureMediaServicesBlock(runtime, element) {
     xhr.open('GET', '${transcript_url}');
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {
-        transcript_cues = initTranscript(myPlayer, xhr.responseText, transcriptPaneEl);
+        transcript_cues = initTranscript(player, xhr.responseText, transcriptPaneEl);
       }
     };
     xhr.send();
@@ -145,10 +145,10 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   parser.parse(transcript);
   parser.flush();
 
-  var html = '<ul>';
+  var html = '<ul class="azure-media-xblock-transcript-cues">';
   for(var i=0;i<cues.length;i++) {
     var cue = cues[i];
-    html += '<li><span class="azure-media-xblock-transcript-element" data-transcript-element-id=' +
+    html += '<li class="azure-media-xblock-transcript-cue"><span class="azure-media-xblock-transcript-element" data-transcript-element-id=' +
         cue.id + ' data-transcript-element-start-time="' + cue.startTime + '" >' +
         cue.text + '</span></li>';
   }
@@ -167,7 +167,7 @@ function initTranscript(player, transcript, transcriptPaneEl) {
 }
 
 
-function _syncTimer(myPlayer, transcript_cues) {
+function _syncTimer(player, transcript_cues) {
     // This is called regularly while the video plays
     // so that we can correctly highlight the transcript elements
     // based on the current position of the video playback
@@ -177,7 +177,7 @@ function _syncTimer(myPlayer, transcript_cues) {
         return;
     }
 
-    var currentTime = myPlayer.currentTime();
+    var currentTime = player.currentTime();
 
     // see if there is a match
     for (var i=0;i<transcript_cues.length; i++) {
