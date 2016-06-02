@@ -69,11 +69,16 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         help=_("A list of caption definitions"),
         scope=Scope.settings
     )
-
+    transcript_url = String(
+        display_name=_("Transcript URL"),
+        help=_("A transcript URL"),
+        scope=Scope.settings
+    )
 
     # These are what become visible in the Mixin editor
     editable_fields = (
-        'display_name', 'video_url', 'verification_key', 'protection_type', 'captions'
+        'display_name', 'video_url', 'verification_key', 'protection_type', 'captions',
+        'transcript_url'
     )
 
     def _get_context_for_template(self):
@@ -84,6 +89,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "video_url": self.video_url,
             "protection_type": self.protection_type,
             "captions": self.captions,
+            "transcript_url": self.transcript_url,
             # this is only for the HTML DOM id of the player element, it can change
             # we make a random one for now so that multiple players can live on the same page
             "player_dom_id": uuid4().hex
@@ -140,10 +146,16 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         fragment.add_javascript(
             loader.render_mako_template(
-                '/static/player.js',
+                '/static/js/player.js',
                 context
             )
         )
+
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/player.css'))
+
+        # for transcript processing
+        if self.transcript_url:
+            fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vendor/vtt.js'))
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing

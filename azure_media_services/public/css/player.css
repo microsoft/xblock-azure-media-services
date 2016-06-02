@@ -1,0 +1,17 @@
+.azure-media-player {
+    float: left;
+}
+
+.azure-media-player-transcript-pane {
+    padding-left: 20px;
+    height: 340px;
+    overflow-y: auto;
+}
+
+.azure-media-xblock-transcript-element {
+    cursor: pointer;
+}
+
+.azure-media-xblock-transcript-element.active {
+    background-color: #cccccc;
+}

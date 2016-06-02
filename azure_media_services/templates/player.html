@@ -1,3 +1,9 @@
-<div class='azure-media-player'>
-    <video id="${player_dom_id}" class="azuremediaplayer amp-default-skin amp-big-play-centered"></video>
+<div class='azure-media-services-xblock'>
+    <div class='azure-media-player'>
+        <video id="${player_dom_id}" class="azuremediaplayer amp-default-skin amp-big-play-centered"></video>
+    </div>
+% if transcript_url:
+    <div id="transcript-${player_dom_id}" class='azure-media-player-transcript-pane'>
+    </div>
+% endif
 </div>
