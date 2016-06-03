@@ -3,10 +3,24 @@
     floating_class = ' floating' if transcript_url else ''
 %>
     <div class='azure-media-player${floating_class}'>
-        <video id="${player_dom_id}" class="azuremediaplayer amp-default-skin amp-big-play-centered"></video>
+        <video class="azuremediaplayer amp-default-skin amp-big-play-centered"
+            data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "width": 550, "height": 343 }'>
+            <source
+                src="${video_url}"
+                type="application/vnd.ms-sstr+xml"
+% if protection_type:
+                data-setup='{"protectionInfo": [{"type": "${protection_type}", "authenticationToken": "Bearer=${auth_token}"}]}'
+% endif
+            />
+
+% for caption in captions:
+            <track kind="${caption['kind']}" src="${caption['src']}" srclang="${caption['srclang']}" label="${caption['label']}" />
+% endfor
+
+        </video>
     </div>
 % if transcript_url:
-    <div id="transcript-${player_dom_id}" class='azure-media-player-transcript-pane'>
+    <div class='azure-media-player-transcript-pane' data-transcript-url="${transcript_url}">
     </div>
 % endif
 </div>

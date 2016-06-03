@@ -1,130 +1,100 @@
 function AzureMediaServicesBlock(runtime, element) {
-    var myOptions = {
-        autoplay: false,
-        logo: {enabled: false},
-        controls: true,
-        width: "550",
-        height: "343",
-        poster: ""
-    };
-
-    var player = amp("${player_dom_id}", myOptions, function () {
-    });
-
-    // This will get filled in by the transcript processor
+  //
+  // IMPORTANT: We need to send in the DOM element which is the
+  // media player. DO NOT SEND IN THE ID because then there is a problem
+  // when we switch between verticals - the player seems to not get re-initialized
+  // after the student clicks out and then clicks back. The result is that the play just
+  // sits and does nothing. My hunch is that the underlying Azure Media Player JS library
+  // thinks that it already initialized DOM element ID 123456....
+  //
+  // However, sending in the DOM element seems to work in this situation when switching between
+  // verticals
+  //
+  var player = amp($(element).find('.azuremediaplayer')[0], null, function() {
+   // This will get filled in by the transcript processor
+    var self = this
     var transcript_cues = null;
 
-    player.src([
-        {
-            src: "${video_url}",
-            type: "application/vnd.ms-sstr+xml",
-% if protection_type:
-            protectionInfo: [{
-                type: "${protection_type}",
-                authenticationToken: "Bearer ${auth_token}"
-            }]
-% endif
-        },
-    ]
-% if captions:
-    ,[
-    % for caption in captions:
-        {
-            src: "${caption['src']}",
-            srclang: "${caption['srclang']}",
-            kind: "subtitles",
-            label: "${caption['label']}"
-        }
-        % if loop.index < len(captions) - 1:
-        ,
-        % endif
-    % endfor
-    ]
-% endif
-    );
-
     // Add event handlers
-
     var eventPostUrl = runtime.handlerUrl(element, 'publish_event');
 
     var timeHandler = null;
 
-    player.addEventListener(amp.eventName.pause,
-        function(evt){
-            _sendPlayerEvent(
-                eventPostUrl,
-                'edx.video.paused',
-                {}
-            );
-            if (timeHandler !== null) {
-                clearInterval(timeHandler);
-            }
+    this.addEventListener(amp.eventName.pause,
+      function(evt){
+        _sendPlayerEvent(
+          eventPostUrl,
+          'edx.video.paused',
+          {}
+        );
+        if (timeHandler !== null) {
+          clearInterval(timeHandler);
         }
-    );
-
-
-    player.addEventListener(amp.eventName.play,
-        function(evt) {
-            _sendPlayerEvent(
-                eventPostUrl,
-                'edx.video.played',
-                {}
-            );
-            timeHandler = setInterval(
-                function() {
-                    _syncTimer(player, transcript_cues);
-                },
-                100
-            );
-        }
-    );
-
-    player.addEventListener(amp.eventName.loadeddata,
-        function(evt) {
-            _sendPlayerEvent(
-                eventPostUrl,
-                'edx.video.loaded',
-                {}
-            );
-        }
-    );
-
-    player.addEventListener(amp.eventName.seeked,
-        function(evt) {
-            _sendPlayerEvent(
-                eventPostUrl,
-                'edx.video.position.changed',
-                {}
-            );
-        }
-    );
-
-    player.addEventListener(amp.eventName.ended,
-        function(evt) {
-            _sendPlayerEvent(
-                eventPostUrl,
-                'edx.video.stopped',
-                {}
-            );
-            if (timeHandler !== null) {
-                clearInterval(timeHandler);
-            }
-        }
-    );
-
-
-% if transcript_url:
-    transcriptPaneEl = $('#transcript-${player_dom_id}');
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '${transcript_url}');
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        transcript_cues = initTranscript(player, xhr.responseText, transcriptPaneEl);
       }
-    };
-    xhr.send();
-% endif
+    );
+
+    this.addEventListener(amp.eventName.play,
+      function(evt) {
+        _sendPlayerEvent(
+          eventPostUrl,
+          'edx.video.played',
+          {}
+        );
+        timeHandler = setInterval(
+          function() {
+            _syncTimer(self, transcript_cues);
+          },
+          100
+        );
+      }
+    );
+
+    this.addEventListener(amp.eventName.loadeddata,
+      function(evt) {
+        _sendPlayerEvent(
+          eventPostUrl,
+          'edx.video.loaded',
+          {}
+        );
+      }
+    );
+
+    this.addEventListener(amp.eventName.seeked,
+      function(evt) {
+        _sendPlayerEvent(
+          eventPostUrl,
+          'edx.video.position.changed',
+          {}
+        );
+      }
+    );
+
+    this.addEventListener(amp.eventName.ended,
+      function(evt) {
+        _sendPlayerEvent(
+          eventPostUrl,
+          'edx.video.stopped',
+          {}
+        );
+        if (timeHandler !== null) {
+          clearInterval(timeHandler);
+        }
+      }
+    );
+
+    transcriptPaneEl = $(element).find('.azure-media-player-transcript-pane');
+
+    if (transcriptPaneEl.length) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', transcriptPaneEl.data('transcript-url'));
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          transcript_cues = initTranscript(this, xhr.responseText, transcriptPaneEl);
+        }
+      };
+      xhr.send();
+    }
+  });
 }
 
 function initTranscript(player, transcript, transcriptPaneEl) {
@@ -169,50 +139,49 @@ function initTranscript(player, transcript, transcriptPaneEl) {
 
 
 function _syncTimer(player, transcript_cues) {
-    // This is called regularly while the video plays
-    // so that we can correctly highlight the transcript elements
-    // based on the current position of the video playback
+  // This is called regularly while the video plays
+  // so that we can correctly highlight the transcript elements
+  // based on the current position of the video playback
 
-    if (transcript_cues === null) {
-        // no transcript - quick exit
-        return;
+  if (transcript_cues === null) {
+    // no transcript - quick exit
+    return;
+  }
+
+  var currentTime = player.currentTime();
+
+  // see if there is a match
+  for (var i=0;i<transcript_cues.length; i++) {
+    cue = transcript_cues[i];
+    if (currentTime >= cue.startTime && currentTime < cue.endTime) {
+      var targetEl = $('span[data-transcript-element-id='+cue.id+']');
+      var isActive = targetEl.hasClass('active');
+
+      if (!isActive) {
+        // highlight the correct one
+        $('.azure-media-xblock-transcript-element').removeClass('active');
+        targetEl.addClass('active');
+      }
+      return;
     }
+  }
 
-    var currentTime = player.currentTime();
-
-    // see if there is a match
-    for (var i=0;i<transcript_cues.length; i++) {
-        cue = transcript_cues[i];
-        if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-            var targetEl = $('span[data-transcript-element-id='+cue.id+']');
-            var isActive = targetEl.hasClass('active');
-
-            if (!isActive) {
-                // highlight the correct one
-                $('.azure-media-xblock-transcript-element').removeClass('active');
-                targetEl.addClass('active');
-            }
-            return;
-        }
-    }
-
-    // clear all - video is not currently at a point which has a current
-    // translation
-    $('.azure-media-xblock-transcript-element').removeClass('active');
-
+  // clear all - video is not currently at a point which has a current
+  // translation
+  $('.azure-media-xblock-transcript-element').removeClass('active');
 }
 
 function _sendPlayerEvent(eventPostUrl, name, data) {
-    data['event_type'] = name;
+  data['event_type'] = name;
 
-    // @TODO: Remove this debugging stuff
-    console.log('Event: ' + name)
-    console.log(data)
+  // @TODO: Remove this debugging stuff
+  console.log('Event: ' + name)
+  console.log(data)
 
-    // send events back to server-side xBlock
-    $.ajax({
-        type: "POST",
-        url: eventPostUrl,
-        data: JSON.stringify(data)
-    });
+  // send events back to server-side xBlock
+  $.ajax({
+    type: "POST",
+    url: eventPostUrl,
+    data: JSON.stringify(data)
+  });
 }

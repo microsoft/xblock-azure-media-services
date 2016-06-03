@@ -144,12 +144,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_css_url('//amp.azure.net/libs/amp/latest/skins/amp-default/azuremediaplayer.min.css')
         fragment.add_javascript_url('//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js')
 
-        fragment.add_javascript(
-            loader.render_mako_template(
-                '/static/js/player.js',
-                context
-            )
-        )
+        fragment.add_javascript(loader.load_unicode('/static/js/player.js'))
 
         fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/player.css'))
 
