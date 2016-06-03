@@ -89,7 +89,7 @@ function AzureMediaServicesBlock(runtime, element) {
       xhr.open('GET', transcriptPaneEl.data('transcript-url'));
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-          transcript_cues = initTranscript(this, xhr.responseText, transcriptPaneEl);
+          transcript_cues = initTranscript(self, xhr.responseText, transcriptPaneEl);
         }
       };
       xhr.send();
