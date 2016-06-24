@@ -9,6 +9,9 @@ This xBlock allows for the inclusion of videos that are hosted on Azure Media Se
 
 * interactive transcripts
 
+This xBlock is still at an experimental stage and is still under development.
+
+
 Installation
 ------------
 
