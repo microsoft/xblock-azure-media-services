@@ -75,7 +75,7 @@ If the video DOES use Protection, then if you just specify the Video URL but fai
 
 ![Cant Decrypt](docs/img/cant_decrypt.png)
 
-If you wish to use Azure Media Service’s Video Protection features, then you will need to have you Azure dashboard set up in a particular manner. For example (old Azure dashboard):
+If you wish to use Azure Media Service’s Video Protection features, then you will need to have your Azure dashboard set up in a particular manner. For example (old Azure dashboard):
 
 ![AES Protection](docs/img/aes_protection.png)
 
@@ -120,7 +120,7 @@ If all is configured correctly - i.e. the verification key, protection type, the
 
 IMPORTANT: I have noticed some latency for some configuration changes in Azure Media Services to take effect. If protected video playback doesn’t work, wait a few minutes and refresh the page. If it still doesn’t work, carefully inspect all of the values and make sure they match between the Azure portal and the xBlock settings
 
-Working with Transcripts/Subtitles/Forums
+Working with Transcripts/Subtitles/Captions
 -----------------------------------------
 
 This version of the Azure Media Services xBlock supports several means to associate text (i.e. dialog) with a video. All text associations with videos uses the WebVTT standard: https://w3c.github.io/webvtt/
