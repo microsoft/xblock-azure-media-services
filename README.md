@@ -27,4 +27,11 @@ $ sudo su edxapp
 $ pip install /path/to/xblock-officevideo/
 ```
 
+Enabling in Studio
+------------------
+
+To enable the Azure Media Services XBlock within studio:
+
+1. Navigate to `Settings -> Advanced Settings` from the top nav bar.
+2. Add `"azure_media_services"` to the Advanced Module List, as shown in the screen shot below.
 
