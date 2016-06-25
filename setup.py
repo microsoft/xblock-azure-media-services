@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All Rights Reserved.
+# Licensed under the MIT license. See LICENSE file on the project webpage for details.
+
 """Setup for azure_media_services XBlock."""
 
 import os
