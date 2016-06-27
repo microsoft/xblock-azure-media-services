@@ -11,6 +11,9 @@ This xBlock allows for the inclusion of videos that are hosted on Azure Media Se
 
 This xBlock is still at an experimental stage and is still under development.
 
+Code of Conduct
+---------------
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 Installation
 ------------
