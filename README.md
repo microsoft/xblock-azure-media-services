@@ -23,14 +23,14 @@ To install the Azure Media Services XBlock within your edX Python environment, r
 ```bash
 $ sudo -u edxapp bash
 $ source /edx/app/edxapp/edxapp_env
-$ pip install /path/to/xblock-officevideo/
+$ pip install /path/to/xblock-azure-media-services/
 ```
 
 or for devstack:
 
 ```bash
 $ sudo su edxapp
-$ pip install /path/to/xblock-officevideo/
+$ pip install /path/to/xblock-azure-media-services/
 ```
 
 
