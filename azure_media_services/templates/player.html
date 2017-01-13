@@ -27,4 +27,7 @@
     <div class='azure-media-player-transcript-pane' data-transcript-url="${transcript_url}">
     </div>
 % endif
+% if download_url:
+    <a href="${download_url}" download> download video </a>
+% endif
 </div>
