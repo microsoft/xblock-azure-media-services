@@ -123,7 +123,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "protection_type": self.protection_type,
             "captions": self.captions,
             "transcript_url": self.transcript_url,
-			"download_url": self.download_url,
+            "download_url": self.download_url,			
         }
 
         if self.protection_type:
