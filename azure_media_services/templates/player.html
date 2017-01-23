@@ -29,14 +29,14 @@
 % endif
 
 <ul class="wrapper-downloads">
+% if download_url:
 	<li class="video-sources video-download-button">
-	% if download_url:
 		<a href="${download_url}">Download video</a>
-	% endif
 	</li>
+% endif	
+% if transcript_url:
 	<li class="video-tracks video-download-button">
-	% if transcript_url:
 		<a href="${transcript_url}">Download transcript</a>
-	% endif
 	</li>
+% endif	
 </ul>
