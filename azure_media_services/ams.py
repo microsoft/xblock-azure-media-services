@@ -102,7 +102,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings
     )
 	
-	download_url = String(
+    download_url_url = String(
         display_name=_("Video Download URL"),
         help=_("A download URL"),
         scope=Scope.settings
