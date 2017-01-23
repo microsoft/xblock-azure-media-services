@@ -31,3 +31,31 @@
     <a href="${download_url}" download> download video </a>
 % endif
 </div>
+
+<ul class="wrapper-downloads">
+% if download_url:
+	<li class="video-sources video-download-button">
+		<a href="${download_url}">Download video</a>
+	</li>
+% endif
+	<li class="video-tracks video-download-button">
+		<a href="/courses/course-v1:Microsoft+AZURE204x+2016_T4/xblock/block-v1:Microsoft+AZURE204x+2016_T4+type@video+block@ef8d7a5ad43741cab8f5bd3083cea41f/handler/transcript/download">Download transcript</a>
+		<div class="a11y-menu-container">
+			<a class="a11y-menu-button" href="#" title=".srt" role="button" aria-disabled="false">.txt</a>
+			<ol class="a11y-menu-list" role="menu">
+			  <li class="a11y-menu-item">
+			  
+				  <a class="a11y-menu-item-link" href="#srt" title="SubRip (.srt) file" data-value="srt" role="menuitem" aria-disabled="false">
+					SubRip (.srt) file
+				  </a>
+			  </li>
+			  <li class="a11y-menu-item active">
+			  
+				  <a class="a11y-menu-item-link" href="#txt" title="Text (.txt) file" data-value="txt" role="menuitem" aria-disabled="false">
+					Text (.txt) file
+				  </a>
+			  </li>
+			</ol>
+		</div>
+	</li>
+  </ul>
