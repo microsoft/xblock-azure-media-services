@@ -101,8 +101,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         help=_("A transcript URL"),
         scope=Scope.settings
     )
-	
-    download_url_url = String(
+    download_url = String(
         display_name=_("Video Download URL"),
         help=_("A download URL"),
         scope=Scope.settings
