@@ -84,10 +84,18 @@ function AzureMediaServicesBlock(runtime, element) {
         }
       }
     );
+	
 
     transcriptPaneEl = $(element).find('.azure-media-player-transcript-pane');
 
     if (transcriptPaneEl.length) {
+	  var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' onClick='toggleEvent()' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
+	  $(".amp-controlbaricons-right").append(divContainer);
+	  $('.azure-media-player-transcript-pane').hide();
+	  $('.amp-big-play-centered').addClass('azure-media-player-max-screen-width');
+	  $('.xblock-render').addClass('azure-media-player-panel-height');
+	  $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
+
       var xhr = new XMLHttpRequest();
       xhr.open('GET', transcriptPaneEl.data('transcript-url'));
       xhr.onreadystatechange = function() {
@@ -215,4 +223,17 @@ function _sendPlayerEvent(eventPostUrl, name, data) {
     url: eventPostUrl,
     data: JSON.stringify(data)
   });
+}
+
+function toggleEvent(){
+	debugger
+	$('.azure-media-player-transcript-pane').toggle();
+	var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
+	if(transcriptContainerVisibility === "none"){
+		$('.xblock-render').addClass('azure-media-player-panel-height');
+		$('.vjs-has-started').addClass('azure-media-player-max-screen-width');
+	} else if(transcriptContainerVisibility === "block"){
+		$('.xblock-render').removeClass('azure-media-player-panel-height');
+		$('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
+	}
 }
