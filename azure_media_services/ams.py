@@ -101,11 +101,16 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         help=_("A transcript URL"),
         scope=Scope.settings
     )
+    download_url = String(
+        display_name=_("Video Download URL"),
+        help=_("A download URL"),
+        scope=Scope.settings
+    )
 
     # These are what become visible in the Mixin editor
     editable_fields = (
         'display_name', 'video_url', 'verification_key', 'protection_type',
-        'token_issuer', 'token_scope', 'token_expiry_mins', 'captions', 'transcript_url',
+        'token_issuer', 'token_scope', 'token_expiry_mins', 'captions', 'transcript_url', 'download_url',
     )
 
     def _get_context_for_template(self):
@@ -117,6 +122,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "protection_type": self.protection_type,
             "captions": self.captions,
             "transcript_url": self.transcript_url,
+            "download_url": self.download_url,			
         }
 
         if self.protection_type:
