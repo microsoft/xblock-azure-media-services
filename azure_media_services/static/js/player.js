@@ -117,10 +117,16 @@ function AzureMediaServicesBlock(runtime, element) {
       // I'm wondering if something is handling the event ahead of us and not passing downstream
       subtitle_els.mousedown(function(evt) {
         var target = $(evt.target);
-        var language_name = target.html()
+        var language_name = target.html();
+		var event_type = 'edx.video.closed_captions.shown';
+		if (language_name == 'Off') {
+			event_type = 'edx.video.closed_captions.hidden';
+			language_name = '';
+		}
+			
         _sendPlayerEvent(
           eventPostUrl,
-          'edx.video.closed_captions.shown',
+          event_type,
           {
             language_name: language_name
           }
