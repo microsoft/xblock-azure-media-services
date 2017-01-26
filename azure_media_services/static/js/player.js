@@ -54,6 +54,13 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
+		  debugger
+		  var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' onClick='toggleEvent()' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
+		  $(".amp-controlbaricons-right").append(divContainer);
+		  $('.azure-media-player-transcript-pane').hide();
+		  $('.amp-big-play-centered').addClass('azure-media-player-max-screen-width');
+		  $('.xblock-render').addClass('azure-media-player-panel-height');
+		  $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
         _sendPlayerEvent(
           eventPostUrl,
           'edx.video.loaded',
@@ -89,12 +96,7 @@ function AzureMediaServicesBlock(runtime, element) {
     transcriptPaneEl = $(element).find('.azure-media-player-transcript-pane');
 
     if (transcriptPaneEl.length) {
-	  var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' onClick='toggleEvent()' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
-	  $(".amp-controlbaricons-right").append(divContainer);
-	  $('.azure-media-player-transcript-pane').hide();
-	  $('.amp-big-play-centered').addClass('azure-media-player-max-screen-width');
-	  $('.xblock-render').addClass('azure-media-player-panel-height');
-	  $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
+	 
 
       var xhr = new XMLHttpRequest();
       xhr.open('GET', transcriptPaneEl.data('transcript-url'));
