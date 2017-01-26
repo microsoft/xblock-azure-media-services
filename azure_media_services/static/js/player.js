@@ -99,12 +99,7 @@ function AzureMediaServicesBlock(runtime, element) {
     }
 
 
-    //
-    // Some experimental code here, that we'll disable, but keep around for future reference
-    //
-    if (true) {
-
-      $(".vjs-subtitles-button").after(
+    $(".vjs-subtitles-button").after(
   '<div aria-pressed="false" aria-label="Subtitles Menu" aria-haspopup="true" tabindex="0" aria-live="polite" role="button" class="vjs-subtitles-button vjs-menu-button vjs-control  amp-subtitles-control"><div class="vjs-control-content"><span class="vjs-control-text">Subtitles</span><div style="display: none;" class="vjs-menu"><ul class="vjs-menu-content"><li aria-selected="true" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item vjs-selected">Off</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">english</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">spanish</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">french</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">italian</li><li class="amp-menu-header">Subtitles</li></ul></div></div></div>'
       );
 	  
@@ -113,8 +108,6 @@ function AzureMediaServicesBlock(runtime, element) {
       // this could change over time (i.e. class names changing)
       var subtitle_els = $(element).find('.vjs-subtitles-button .vjs-menu-item');
 
-      // Unfortunately we can't seem to get the 'click' event to register here.
-      // I'm wondering if something is handling the event ahead of us and not passing downstream
       subtitle_els.mousedown(function(evt) {
         var target = $(evt.target);
         var language_name = target.html();
@@ -132,8 +125,6 @@ function AzureMediaServicesBlock(runtime, element) {
           }
         )
       });
-    }
-
   });
 }
 
