@@ -209,8 +209,30 @@ function _syncTimer(player, transcript_cues, element) {
   // clear all - video is not currently at a point which has a current
   // translation
   $('.azure-media-xblock-transcript-element').removeClass('active');
-}
 
+  }
+
+function toggleEvent(){
+	$('.azure-media-player-transcript-pane').toggle();
+	var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
+	var event_type = ''
+	if(transcriptContainerVisibility === "none"){
+		event_type = 'edx.video.transcript.hidden';
+		$('.xblock-render').addClass('azure-media-player-panel-height');
+		$('.vjs-has-started').addClass('azure-media-player-max-screen-width');
+	} else if(transcriptContainerVisibility === "block"){
+		event_type = 'edx.video.transcript.show';
+		$('.xblock-render').removeClass('azure-media-player-panel-height');
+		$('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
+	}
+	
+	_sendPlayerEvent(
+          eventPostUrl,
+          event_type,
+          {}
+        );
+}
+  
 function _sendPlayerEvent(eventPostUrl, name, data) {
   data['event_type'] = name;
 
@@ -224,25 +246,4 @@ function _sendPlayerEvent(eventPostUrl, name, data) {
     url: eventPostUrl,
     data: JSON.stringify(data)
   });
-}
-
-function toggleEvent(){
-	$('.azure-media-player-transcript-pane').toggle();
-	var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
-	var eventName = '';
-	if(transcriptContainerVisibility === "none"){
-		eventName = 'edx.video.transcript.hidden';
-		$('.xblock-render').addClass('azure-media-player-panel-height');
-		$('.vjs-has-started').addClass('azure-media-player-max-screen-width');
-	} else if(transcriptContainerVisibility === "block"){
-		eventName = 'edx.video.transcript.show';
-		$('.xblock-render').removeClass('azure-media-player-panel-height');
-		$('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
-	}
-	
-	_sendPlayerEvent(
-          eventPostUrl,
-          eventName,
-          {}
-        );
 }
