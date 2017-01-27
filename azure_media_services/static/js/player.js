@@ -228,14 +228,22 @@ function _sendPlayerEvent(eventPostUrl, name, data) {
 }
 
 function toggleEvent(){
-	debugger
 	$('.azure-media-player-transcript-pane').toggle();
 	var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
+	var eventName = '';
 	if(transcriptContainerVisibility === "none"){
+		eventName = 'edx.video.transcript.hidden';
 		$('.xblock-render').addClass('azure-media-player-panel-height');
 		$('.vjs-has-started').addClass('azure-media-player-max-screen-width');
 	} else if(transcriptContainerVisibility === "block"){
+		eventName = 'edx.video.transcript.show';
 		$('.xblock-render').removeClass('azure-media-player-panel-height');
 		$('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
 	}
+	
+	_sendPlayerEvent(
+          eventPostUrl,
+          eventName,
+          {}
+        );
 }
