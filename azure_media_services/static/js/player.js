@@ -54,7 +54,6 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
-		  debugger
 		  var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' onClick='toggleEvent()' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
 		  $(".amp-controlbaricons-right").append(divContainer);
 		  $('.azure-media-player-transcript-pane').hide();
