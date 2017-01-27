@@ -54,6 +54,32 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
+		  var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
+		  $(".amp-controlbaricons-right").append(divContainer);
+		  $('.azure-media-player-transcript-pane').hide();
+		  $('.amp-big-play-centered').addClass('azure-media-player-max-screen-width');
+		  $('.xblock-render').addClass('azure-media-player-panel-height');
+		  $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
+		  $('#toggleTranscript').click(function() {
+			$('.azure-media-player-transcript-pane').toggle();
+			var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
+			var event_type = ''
+			if(transcriptContainerVisibility === "none"){
+				event_type = 'edx.video.transcript.hidden';
+				$('.xblock-render').addClass('azure-media-player-panel-height');
+				$('.vjs-has-started').addClass('azure-media-player-max-screen-width');
+			} else if(transcriptContainerVisibility === "block"){
+				event_type = 'edx.video.transcript.show';
+				$('.xblock-render').removeClass('azure-media-player-panel-height');
+				$('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
+			}
+	
+			_sendPlayerEvent(
+				  eventPostUrl,
+				  event_type,
+				  {}
+				);
+		  });
         _sendPlayerEvent(
           eventPostUrl,
           'edx.video.loaded',
@@ -84,10 +110,13 @@ function AzureMediaServicesBlock(runtime, element) {
         }
       }
     );
+	
 
     transcriptPaneEl = $(element).find('.azure-media-player-transcript-pane');
 
     if (transcriptPaneEl.length) {
+	 
+
       var xhr = new XMLHttpRequest();
       xhr.open('GET', transcriptPaneEl.data('transcript-url'));
       xhr.onreadystatechange = function() {
@@ -200,8 +229,9 @@ function _syncTimer(player, transcript_cues, element) {
   // clear all - video is not currently at a point which has a current
   // translation
   $('.azure-media-xblock-transcript-element').removeClass('active');
-}
 
+}
+  
 function _sendPlayerEvent(eventPostUrl, name, data) {
   data['event_type'] = name;
 
