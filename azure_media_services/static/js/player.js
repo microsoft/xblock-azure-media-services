@@ -60,7 +60,7 @@ function AzureMediaServicesBlock(runtime, element) {
 		  $('.amp-big-play-centered').addClass('azure-media-player-max-screen-width');
 		  $('.xblock-render').addClass('azure-media-player-panel-height');
 		  $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
-		  toggleTranscript.click(function() {
+		  $('#toggleTranscript').click(function() {
 			$('.azure-media-player-transcript-pane').toggle();
 			var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
 			var event_type = ''
