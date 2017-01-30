@@ -28,15 +28,16 @@
     </div>
 % endif
 
-<ul class="wrapper-downloads">
+<div class="wrapper-downloads azure-media-wrraper-download-container">
 % if download_url:
-	<li class="video-sources video-download-button">
-		<a href="${download_url}">Download video</a>
-	</li>
-% endif	
+	<div class="video-sources transcript-download-btn-style">
+			<a class="azure-media-button-style" href="${download_url}">Download video</a>
+	</div>
+% endif
 % if transcript_url:
-	<li class="video-tracks video-download-button">
-		<a href="${transcript_url}">Download transcript</a>
-	</li>
-% endif	
-</ul>
+	<div class="video-tracks transcript-download-btn-style">
+			<a class ="azure-media-button-style" href="${transcript_url}">Download transcript</a>
+	</div>
+% endif
+</div>
+</div>
