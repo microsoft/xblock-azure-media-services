@@ -67,11 +67,13 @@ function AzureMediaServicesBlock(runtime, element) {
 			if(transcriptContainerVisibility === "none"){
 				event_type = 'edx.video.transcript.hidden';
 				$('.xblock-render').addClass('azure-media-player-panel-height');
+				$('.vjs-has-started').removeClass('azure-media-player-min-screen-width');
 				$('.vjs-has-started').addClass('azure-media-player-max-screen-width');
 			} else if(transcriptContainerVisibility === "block"){
 				event_type = 'edx.video.transcript.show';
 				$('.xblock-render').removeClass('azure-media-player-panel-height');
 				$('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
+				$('.vjs-has-started').addClass('azure-media-player-min-screen-width');
 			}
 	
 			_sendPlayerEvent(

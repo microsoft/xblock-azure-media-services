@@ -36,6 +36,10 @@ li.azure-media-xblock-transcript-cue {
   width:830px !important ;
 }
 
+.azure-media-player-min-screen-width{
+  width:550px !important ;
+}
+
 .azure-media-player-min-screen-width {
 	width:345px !important;
 }
