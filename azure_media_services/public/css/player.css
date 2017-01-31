@@ -18,6 +18,7 @@ li.azure-media-xblock-transcript-cue {
     padding-left: 10px;
     height: 340px;
     overflow-y: auto;
+	display: none;
 }
 
 .azure-media-xblock-transcript-element {

@@ -225,6 +225,16 @@ function _syncTimer(player, transcript_cues, element) {
         // highlight the correct one
         $('.azure-media-xblock-transcript-element').removeClass('active');
         targetEl.addClass('active');
+		 // after getting highlighted one, below one wil autoscroll.
+		var topPositionOfActiveElement = targetEl.position().top;
+        var transcriptPanelVisibleAreaHeight = transcriptPaneEl[0].clientHeight;
+        var halfOfTranscriptPanelContainer = transcriptPanelVisibleAreaHeight / 2;
+        if(topPositionOfActiveElement!==0 && 
+		   topPositionOfActiveElement > halfOfTranscriptPanelContainer &&
+		   topPositionOfActiveElement>transcriptPanelVisibleAreaHeight) {
+			var newScrollTopPosition = Math.ceil(transcriptPanelVisibleAreaHeight/6);
+			$('.azure-media-player-transcript-pane')[0].scrollTop += newScrollTopPosition;
+		}
       }
       return;
     }
