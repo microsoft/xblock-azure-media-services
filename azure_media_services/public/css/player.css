@@ -16,7 +16,7 @@ li.azure-media-xblock-transcript-cue {
 
 .azure-media-player-transcript-pane {
     padding-left: 10px;
-    height: 340px;
+    height: 448px;
     overflow-y: auto;
 	display: none;
 }
@@ -30,7 +30,7 @@ li.azure-media-xblock-transcript-cue {
 }
 
 .azure-media-player-panel-height{
-    height:400px;
+    height:448px;
 }
 .azure-media-player-max-screen-width{
   width:830px !important ;
@@ -78,7 +78,8 @@ li.azure-media-xblock-transcript-cue {
 }
 
 .azure-media-wrraper-download-container {
-    width:100%;
+    width: 100%;
+	float: left;
 }
 .azure-media-button-container {
     margin-top:14px;
