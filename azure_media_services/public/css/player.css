@@ -37,7 +37,8 @@ li.azure-media-xblock-transcript-cue {
 }
 
 .azure-media-player-min-screen-width{
-  width:550px !important ;
+  width:550px !important;
+  height:448px !important;
 }
 
 .azure-media-player-toggle-button-style {
