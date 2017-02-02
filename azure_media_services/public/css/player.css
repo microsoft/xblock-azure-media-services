@@ -1,7 +1,10 @@
 /* Copyright (c) Microsoft Corporation. All Rights Reserved.
  * Licensed under the MIT license. See LICENSE file on the project webpage for details.
  */
-.azure-media-player.floating {
+ .wrapper-xblock.level-element .xblock-render {
+	height: 560px !important;
+} 
+ .azure-media-player.floating {
     float: left;
 }
 
