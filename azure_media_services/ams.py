@@ -175,7 +175,6 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         '''
         Note: firefox throws an error when using amp's bundled WebVTT.Parser so
                 we're importing it directly.
-
         @TODO: improve this workaround by using minified in a more stable place (this xblock?)
         @TODO: open bug w/ amp team
         '''
