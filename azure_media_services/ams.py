@@ -166,11 +166,11 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         '''
         @TODO: Note: DO NOT USE the "latest" folder in production. Replace "latest" with a version number like "1.0.0"
-        EX:<script src="//amp.azure.net/libs/amp/1.0.0/azuremediaplayer.min.js"></script>
         Azure Media Player versions can be queried from //aka.ms/ampchangelog
         '''
-        fragment.add_css_url('//amp.azure.net/libs/amp/latest/skins/amp-default/azuremediaplayer.min.css')
-        fragment.add_javascript_url('//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js')
+        fragment.add_css_url('//amp.azure.net/libs/amp/1.7.4/skins/amp-default/azuremediaplayer.min.css')
+        fragment.add_javascript_url('//amp.azure.net/libs/amp/1.7.4/azuremediaplayer.min.js')
+        #fragment.add_javascript_url('//raw.githubusercontent.com/mozilla/vtt.js/master/dist/vtt.js')
 
         fragment.add_javascript(loader.load_unicode('/static/js/player.js'))
 
