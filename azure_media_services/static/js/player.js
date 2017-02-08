@@ -167,7 +167,6 @@ function AzureMediaServicesBlock (runtime, element) {
 }
 
 function initTranscript(player, transcript, transcriptPaneEl) {
-  debugger;
   var parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
 
   var cues = [];
@@ -183,10 +182,7 @@ function initTranscript(player, transcript, transcriptPaneEl) {
     console.log(error);
   }
 
-  // todo: fix firefox bug.
-  debugger;
   parser.parse(transcript);
-  debugger;
   parser.flush();
 
   // todo: bug _ this is the worst possible way to do this.

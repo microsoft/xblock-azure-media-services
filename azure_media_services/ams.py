@@ -165,12 +165,21 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_content(loader.render_mako_template('/templates/player.html', context))
 
         '''
-        @TODO: Note: DO NOT USE the "latest" folder in production. Replace "latest" with a version number like "1.0.0"
-        Azure Media Player versions can be queried from //aka.ms/ampchangelog
+        Note: DO NOT USE the "latest" folder in production, but specify a version
+                from aka.ms/ampchangelog. This allows us to run a test pass prior
+                to ingesting later versions.
         '''
-        fragment.add_css_url('//amp.azure.net/libs/amp/1.7.4/skins/amp-default/azuremediaplayer.min.css')
-        fragment.add_javascript_url('//amp.azure.net/libs/amp/1.7.4/azuremediaplayer.min.js')
-        #fragment.add_javascript_url('//raw.githubusercontent.com/mozilla/vtt.js/master/dist/vtt.js')
+        fragment.add_css_url('//amp.azure.net/libs/amp/1.8.1/skins/amp-default/azuremediaplayer.min.css')
+        fragment.add_javascript_url('//amp.azure.net/libs/amp/1.8.1/azuremediaplayer.min.js')
+
+        '''
+        Note: firefox throws an error when using amp's bundled WebVTT.Parser so
+                we're importing it directly.
+
+        @TODO: improve this workaround by using minified in a more stable place (this xblock?)
+        @TODO: open bug w/ amp team
+        '''
+        fragment.add_javascript_url('//rawgit.com/mozilla/vtt.js/master/dist/vtt.js')
 
         fragment.add_javascript(loader.load_unicode('/static/js/player.js'))
 
