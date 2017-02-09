@@ -166,28 +166,19 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         '''
         Note: DO NOT USE the "latest" folder in production, but specify a version
-                from aka.ms/ampchangelog. This allows us to run a test pass prior
-                to ingesting later versions.
+                from https://aka.ms/ampchangelog. This allows us to run a test
+                pass prior to ingesting later versions.
         '''
         fragment.add_css_url('//amp.azure.net/libs/amp/1.8.1/skins/amp-default/azuremediaplayer.min.css')
         fragment.add_javascript_url('//amp.azure.net/libs/amp/1.8.1/azuremediaplayer.min.js')
 
-        '''
-        Note: firefox throws an error when using amp's bundled WebVTT.Parser so
-                we're importing it directly.
-        @TODO: improve this workaround by using minified in a more stable place (this xblock?)
-        @TODO: open bug w/ amp team
-        '''
-        fragment.add_javascript_url('//rawgit.com/mozilla/vtt.js/master/dist/vtt.js')
+        fragment.add_javascript(loader.load_unicode('./static/js/player.js'))
 
-        fragment.add_javascript(loader.load_unicode('/static/js/player.js'))
-
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/player.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, './public/css/player.css'))
 
         # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
         # actually need to include our local copy of public/js/vendor/vtt.js. In fact, if we do
         # the overlay subtitles stop working
-
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing
