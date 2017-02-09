@@ -2,19 +2,7 @@
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
 function AzureMediaServicesBlock (runtime, element) {
-  //
-  // IMPORTANT: We need to send in the media player DOM element
-  // ID because that causes problems. For example, the player
-  // doesn't get re-initialized when the student changes focus
-  // (to and from player). The result is a player that doesn't
-  // respond to user action. My hunch is that the underlying
-  // Azure Media Player JS library thinks it already
-  // initialized the DOM element with that ID.
-  //
-  // However, sending in the DOM element itself seems to work
-  // when switching between verticals.
-  //
-  var player = amp($(element).find('.azuremediaplayer')[0], null, function () {
+  var player = amp('azure-media-services-xblock-video', null, function () {
     // This will get filled in by the transcript processor
     var self = this
     var transcript_cues = null;
