@@ -43,6 +43,8 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
+        // this complex and fragile.
+        // todo: toggle as few "parent" classes as possible
         if ($('.azure-media-player-transcript-pane').length) {
           var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
           $(".amp-controlbaricons-right").append(divContainer);
@@ -142,15 +144,6 @@ function AzureMediaServicesBlock(runtime, element) {
         }
       )
     });
-
-    //
-    // Some experimental code here, that we'll disable, but keep around for future reference
-    //
-    if (false) {
-      $(".vjs-subtitles-button").after(
-        '<div aria-pressed="false" aria-label="Subtitles Menu" aria-haspopup="true" tabindex="0" aria-live="polite" role="button" class="vjs-subtitles-button vjs-menu-button vjs-control  amp-subtitles-control"><div class="vjs-control-content"><span class="vjs-control-text">Subtitles</span><div style="display: none;" class="vjs-menu"><ul class="vjs-menu-content"><li aria-selected="true" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item vjs-selected">Off</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">english</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">spanish</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">french</li><li aria-selected="false" tabindex="0" aria-live="polite" role="button" class="vjs-menu-item">italian</li><li class="amp-menu-header">Subtitles</li></ul></div></div></div>'
-      );
-    }
   });
 }
 
@@ -174,28 +167,26 @@ function initTranscript(player, transcript, transcriptPaneEl) {
     parser.parse(transcript);
   }
   catch (e) {
+    //todo:remove when firefox bug is fixed.
     transcriptPaneEl.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
     transcriptPaneEl.append('<span><p>error From File: ' + e.fileName + '</p></span><br/>');
     transcriptPaneEl.append('<span><p>errorMessage: ' + e.message + '</p></span><br/>');
   }
   parser.flush();
 
-  // todo: bug _ this is the worst possible way to do this.
-  // Markup should either be fully separated from
-  // script OR fully integrated (like react). We
-  // should therefore either:
+  // In general, markup that's driven by a data model should either be fully separated
+  // from script OR fully integrated (like react). We should therefore either:
   //
-  // a) switch to a client-side templating solution for this
-  //      (like handlebars, mustache, underscore, etc). The
-  //      most sensible approach is to use Backbone's views
-  //      since edx already uses backbone.
+  // a) switch to a client-side templating solution for this (like handlebars,
+  //      mustache, underscore, etc). The most sensible approach is to
+  //      TODO: use Backbone's views since edx uses backbone.
   //
   //  OR
   //
-  // b) continue following the django MVC solution by loading
-  //      the transcript as part of our server-side model.
-  //      This would mean a service-to-servie call, but would
-  //      allow for some servers-side caching too.
+  // b) continue following the django MVC solution by loading the
+  //      transcript as part of our server-side model. This would
+  //      mean a service-to-servie call, but would allow for some
+  //      servers-side caching too.
   var html = '<ul class="azure-media-xblock-transcript-cues">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
