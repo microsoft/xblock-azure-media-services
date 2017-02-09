@@ -174,7 +174,9 @@ function initTranscript(player, transcript, transcriptPaneEl) {
     parser.parse(transcript);
   }
   catch (e) {
-    transcriptPaneEl.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span>');
+    transcriptPaneEl.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
+    transcriptPaneEl.append('<span><p>error From File: ' + e.fileName + '</p></span><br/>');
+    transcriptPaneEl.append('<span><p>errorMessage: ' + e.message + '</p></span><br/>');
   }
   parser.flush();
 
