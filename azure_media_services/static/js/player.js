@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
-function AzureMediaServicesBlock (runtime, element) {
-  var player = amp('azure-media-services-xblock-video', null, function () {
+function AzureMediaServicesBlock(runtime, element) {
+  var player = amp('azure-media-services-xblock-video', null, function() {
     // This will get filled in by the transcript processor
     var self = this
     var transcript_cues = null;
@@ -13,7 +13,7 @@ function AzureMediaServicesBlock (runtime, element) {
     var timeHandler = null;
 
     this.addEventListener(amp.eventName.pause,
-      function (evt) {
+      function(evt) {
         _sendPlayerEvent(
           eventPostUrl,
           'edx.video.paused',
@@ -26,14 +26,14 @@ function AzureMediaServicesBlock (runtime, element) {
     );
 
     this.addEventListener(amp.eventName.play,
-      function (evt) {
+      function(evt) {
         _sendPlayerEvent(
           eventPostUrl,
           'edx.video.played',
           {}
         );
         timeHandler = setInterval(
-          function () {
+          function() {
             _syncTimer(self, transcript_cues, element);
           },
           100
@@ -42,7 +42,7 @@ function AzureMediaServicesBlock (runtime, element) {
     );
 
     this.addEventListener(amp.eventName.loadeddata,
-      function (evt) {
+      function(evt) {
         if ($('.azure-media-player-transcript-pane').length) {
           var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
           $(".amp-controlbaricons-right").append(divContainer);
@@ -51,7 +51,7 @@ function AzureMediaServicesBlock (runtime, element) {
           $('.xblock-render').addClass('azure-media-player-panel-height');
           $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
 
-          $('#toggleTranscript').click(function () {
+          $('#toggleTranscript').click(function() {
             $('.azure-media-player-transcript-pane').toggle();
             var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
             var event_type = ''
@@ -85,7 +85,7 @@ function AzureMediaServicesBlock (runtime, element) {
     );
 
     this.addEventListener(amp.eventName.seeked,
-      function (evt) {
+      function(evt) {
         _sendPlayerEvent(
           eventPostUrl,
           'edx.video.position.changed',
@@ -95,7 +95,7 @@ function AzureMediaServicesBlock (runtime, element) {
     );
 
     this.addEventListener(amp.eventName.ended,
-      function (evt) {
+      function(evt) {
         _sendPlayerEvent(
           eventPostUrl,
           'edx.video.stopped',
@@ -112,7 +112,7 @@ function AzureMediaServicesBlock (runtime, element) {
     if (transcriptPaneEl.length) {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', transcriptPaneEl.data('transcript-url'));
-      xhr.onreadystatechange = function () {
+      xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
           transcript_cues = initTranscript(self, xhr.responseText, transcriptPaneEl);
         }
@@ -125,7 +125,7 @@ function AzureMediaServicesBlock (runtime, element) {
     // this could change over time (i.e. class names changing)
     var subtitle_els = $(element).find('.vjs-subtitles-button .vjs-menu-item');
 
-    subtitle_els.mousedown(function (evt) {
+    subtitle_els.mousedown(function(evt) {
       var target = $(evt.target);
       var language_name = target.html();
       var event_type = 'edx.video.closed_captions.shown';
@@ -160,13 +160,13 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   var cues = [];
   var regions = [];
 
-  parser.oncue = function (cue) {
+  parser.oncue = function(cue) {
     cues.push(cue);
   };
-  parser.onregion = function (region) {
+  parser.onregion = function(region) {
     regions.push(region);
   }
-  parser.onparsingerror = function (error) {
+  parser.onparsingerror = function(error) {
     console.log(error);
   }
 
@@ -207,7 +207,7 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   transcriptPaneEl.append(html);
 
   // handle events when user clicks on transcripts
-  $('.azure-media-xblock-transcript-element').click(function (evt) {
+  $('.azure-media-xblock-transcript-element').click(function(evt) {
     var start_time = parseFloat($(evt.target).data('transcript-element-start-time'));
 
     // set the player to match the transcript time
