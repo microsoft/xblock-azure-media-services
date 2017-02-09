@@ -172,9 +172,9 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_css_url('//amp.azure.net/libs/amp/1.8.1/skins/amp-default/azuremediaplayer.min.css')
         fragment.add_javascript_url('//amp.azure.net/libs/amp/1.8.1/azuremediaplayer.min.js')
 
-        fragment.add_javascript(loader.load_unicode('./static/js/player.js'))
+        fragment.add_javascript(loader.load_unicode('static/js/player.js'))
 
-        fragment.add_css_url(self.runtime.local_resource_url(self, './public/css/player.css'))
+        fragment.add_css(loader.load_unicode('public/css/player.css'))
 
         # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
         # actually need to include our local copy of public/js/vendor/vtt.js. In fact, if we do

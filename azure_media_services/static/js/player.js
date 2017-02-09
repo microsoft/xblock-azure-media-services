@@ -170,7 +170,12 @@ function initTranscript(player, transcript, transcriptPaneEl) {
     console.log(error);
   }
 
-  parser.parse(transcript);
+  try {
+    parser.parse(transcript);
+  }
+  catch (e) {
+    transcriptPaneEl.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span>');
+  }
   parser.flush();
 
   // todo: bug _ this is the worst possible way to do this.
