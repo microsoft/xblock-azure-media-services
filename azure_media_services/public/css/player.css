@@ -2,7 +2,8 @@
  * Licensed under the MIT license. See LICENSE file on the project webpage for details.
  */
  .wrapper-xblock.level-element .xblock-render {
-	height: 560px !important;
+	height: 567px !important;
+    background: #f0f3f5;
 } 
  .azure-media-player.floating {
     float: left;
@@ -26,10 +27,17 @@ li.azure-media-xblock-transcript-cue {
 
 .azure-media-xblock-transcript-element {
     cursor: pointer;
+    font-size: 14px;
+    color: #0074b5;
+}
+
+.azure-media-xblock-transcript-element:hover {
+    text-decoration: underline;
 }
 
 .azure-media-xblock-transcript-element.active {
-    background-color: #cccccc;
+    color: black;
+    font-weight: bold;
 }
 
 .azure-media-player-panel-height{
@@ -47,7 +55,6 @@ li.azure-media-xblock-transcript-cue {
 .azure-media-player-toggle-button-style {
 	top: 9px;
 	outline: none;
-	position: relative;
 	cursor: pointer;
 	float: left;
 	text-align: center;
@@ -60,6 +67,10 @@ li.azure-media-xblock-transcript-cue {
 	-moz-osx-font-smoothing: grayscale;
 	float: right;
 	font-size: 13px;
+}
+
+.azure-media-player-toggle-button-style:hover {
+        background-color: rgba(255,255,255,.1);
 }
 
 .transcript-download-btn-style{
@@ -98,6 +109,7 @@ li.azure-media-xblock-transcript-cue {
     float: left;
     border-radius: 3px;
     padding: 15px;
+    background-color: white;
 }
 
 
