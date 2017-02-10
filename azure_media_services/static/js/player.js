@@ -43,31 +43,25 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
-        // this complex and fragile.
-        // todo: toggle as few "parent" classes as possible
-        if ($('.azure-media-player-transcript-pane').length) {
+        $('#azure-media-services-xblock-video').css('width', '');
+
+        if ($('.subtitles').length) {
           var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
           $(".amp-controlbaricons-right").append(divContainer);
-          $('.azure-media-player-transcript-pane').hide();
-          $('.amp-big-play-centered').addClass('azure-media-player-max-screen-width');
-          $('.xblock-render').addClass('azure-media-player-panel-height');
-          $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
 
           $('#toggleTranscript').click(function() {
-            $('.azure-media-player-transcript-pane').toggle();
-            var transcriptContainerVisibility = $('.azure-media-player-transcript-pane')[0].style.display;
+            $('.subtitles').toggle();
+            var transcriptContainerVisibility = $('.subtitles')[0].style.display;
             var event_type = ''
 
             if (transcriptContainerVisibility === "none") {
               event_type = 'edx.video.transcript.hidden';
-              $('.xblock-render').addClass('azure-media-player-panel-height');
-              $('.vjs-has-started').removeClass('azure-media-player-min-screen-width');
-              $('.vjs-has-started').addClass('azure-media-player-max-screen-width');
-            } else if (transcriptContainerVisibility === "block") {
+
+              $('.video').addClass('closed')
+            } else {
               event_type = 'edx.video.transcript.show';
-              $('.xblock-render').removeClass('azure-media-player-panel-height');
-              $('.vjs-has-started').removeClass('azure-media-player-max-screen-width');
-              $('.vjs-has-started').addClass('azure-media-player-min-screen-width');
+
+              $('.video').removeClass('closed')
             }
 
             _sendPlayerEvent(
@@ -109,7 +103,7 @@ function AzureMediaServicesBlock(runtime, element) {
       }
     );
 
-    transcriptPaneEl = $(element).find('.azure-media-player-transcript-pane');
+    transcriptPaneEl = $(element).find('.subtitles');
 
     if (transcriptPaneEl.length) {
       var xhr = new XMLHttpRequest();
@@ -187,14 +181,15 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   //      transcript as part of our server-side model. This would
   //      mean a service-to-servie call, but would allow for some
   //      servers-side caching too.
-  var html = '<ul class="azure-media-xblock-transcript-cues">';
+  var html = '<ol class="subtitles-menu">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
-    html += '<li class="azure-media-xblock-transcript-cue"><span class="azure-media-xblock-transcript-element" data-transcript-element-id=' +
-      cue.id + ' data-transcript-element-start-time="' + cue.startTime + '" >' +
-      cue.text + '</span></li>';
+    html += '<li data-transcript-element-id="' + cue.id
+          + '" data-transcript-element-start-time="' + cue.startTime
+          + '" class="azure-media-xblock-transcript-element" >'
+          + cue.text + '</li>';
   }
-  html += '</ul>';
+  html += '</ol>';
   transcriptPaneEl.append(html);
 
   // handle events when user clicks on transcripts
@@ -224,13 +219,13 @@ function _syncTimer(player, transcript_cues, element) {
   for (var i = 0; i < transcript_cues.length; i++) {
     cue = transcript_cues[i];
     if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-      var targetEl = $('span[data-transcript-element-id=' + cue.id + ']');
-      var isActive = targetEl.hasClass('active');
+      var targetEl = $('li[data-transcript-element-id=' + cue.id + ']');
+      var isActive = targetEl.hasClass('current');
 
       if (!isActive) {
         // highlight the correct one
-        $('.azure-media-xblock-transcript-element').removeClass('active');
-        targetEl.addClass('active');
+        $('.azure-media-xblock-transcript-element').removeClass('current');
+        targetEl.addClass('current');
         // after getting highlighted one, below one wil autoscroll.
         var topPositionOfActiveElement = targetEl.position().top;
         var transcriptPanelVisibleAreaHeight = transcriptPaneEl[0].clientHeight;
@@ -248,7 +243,7 @@ function _syncTimer(player, transcript_cues, element) {
 
   // clear all - video is not currently at a point which has a current
   // translation
-  $('.azure-media-xblock-transcript-element').removeClass('active');
+  $('.azure-media-xblock-transcript-element').removeClass('current');
 }
 
 function _sendPlayerEvent(eventPostUrl, name, data) {

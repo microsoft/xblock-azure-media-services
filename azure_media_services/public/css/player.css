@@ -1,51 +1,8 @@
 /* Copyright (c) Microsoft Corporation. All Rights Reserved.
  * Licensed under the MIT license. See LICENSE file on the project webpage for details.
  */
- 
- .wrapper-xblock.level-element .xblock-render {
-	height: 560px !important;
-} 
- .azure-media-player.floating {
-    float: left;
-}
 
-ul.azure-media-xblock-transcript-cues {
-    list-style: none !important;
-    padding-left: 0 !important;
-}
-
-li.azure-media-xblock-transcript-cue {
-    margin-bottom: 0.25em !important;
-}
-
-.azure-media-player-transcript-pane {
-    padding-left: 10px;
-    height: 448px;
-    overflow-y: auto;
-	display: none;
-}
-
-.azure-media-xblock-transcript-element {
-    cursor: pointer;
-}
-
-.azure-media-xblock-transcript-element.active {
-    background-color: #cccccc;
-}
-
-.azure-media-player-panel-height{
-    height:448px;
-}
-.azure-media-player-max-screen-width{
-  width:830px !important ;
-}
-
-.azure-media-player-min-screen-width{
-  width:550px !important;
-  height:448px !important;
-}
-
-.azure-media-player-toggle-button-style {
+ .azure-media-player-toggle-button-style {
 	top: 9px;
 	outline: none;
 	position: relative;
@@ -62,41 +19,6 @@ li.azure-media-xblock-transcript-cue {
 	float: right;
 	font-size: 13px;
 }
-
-.transcript-download-btn-style{
-    padding-right: 20px;
-    padding-top: 15px;
-    float:left;
-}
-
-.transcript-download-btn-style a:visited {
-    color: #fff !important;
-    background-color: #0072c6;
-}
-.transcript-download-btn-style a:hover {
-    color: #fff !important;
-    background-color: #0072c6;
-}
-
-.xblock-media-services-height{
-    height: 344px;
-}
-
-.azure-media-wrraper-download-container {
-    width: 100%;
-	float: left;
-}
-.azure-media-button-container {
-    margin-top:14px;
-    width: 100%;
-}
-
-.azure-media-button-style {
-    padding-left: 21px;
-    margin: 0px 10px 2px 0;
-    font-size: 14px;
-    line-height: 14px;
-    float: left;
-    border-radius: 3px;
-    padding: 15px;
+.azuremediaplayer {
+    border: 0 !important;
 }
