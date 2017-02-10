@@ -196,6 +196,8 @@ function initTranscript(player, transcript, transcriptPaneEl) {
 
   // handle events when user clicks on transcripts
   $('.azure-media-xblock-transcript-element').click(function(evt){
+  var datatranscriptelementid = $(this).attr('data-transcript-element-id');
+  var targetEl = $('span[data-transcript-element-id='+datatranscriptelementid+']');
     var start_time = parseFloat($(evt.target).data('transcript-element-start-time'));
 
     // set the player to match the transcript time
