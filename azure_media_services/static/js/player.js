@@ -27,10 +27,10 @@ function AzureMediaServicesBlock(runtime, element) {
       function(evt){
 
 //
-var $xYz = $('.azure-media-player-transcript-pane');
-var iNdex = $(".azure-media-xblock-transcript-element.active").attr("data-transcript-element-id");
+//var $xYz = $('.azure-media-player-transcript-pane');
+//var iNdex = $(".azure-media-xblock-transcript-element.active").attr("data-transcript-element-id");
 
-console.log("begining",iNdex)
+//console.log("begining",iNdex)
  _sendPlayerEvent(
           eventPostUrl,
           'edx.video.paused',
@@ -188,7 +188,7 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   parser.parse(transcript);
   parser.flush();
 
-  var html = '<ul id="naam" class="azure-media-xblock-transcript-cues"><li role="link" style="height:170px;"><span style="height:170px;"></span></li>';
+  var html = '<ul class="azure-media-xblock-transcript-cues"><li role="link" style="height:170px;"><span style="height:170px;"></span></li>';
   for(var i=0;i<cues.length;i++) {
     var cue = cues[i];
     html += '<li id="'+cue.id+'" class="azure-media-xblock-transcript-cue"><span class="azure-media-xblock-transcript-element" data-transcript-element-id=' +
