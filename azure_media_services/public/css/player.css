@@ -60,7 +60,7 @@ li.azure-media-xblock-transcript-cue {
 	text-align: center;
 	vertical-align: middle;
 	margin: 0;
-	padding: 0;
+	padding-top: 8px;
 	height: 28px;
 	width: 28px;
 	-webkit-font-smoothing: antialiased;
