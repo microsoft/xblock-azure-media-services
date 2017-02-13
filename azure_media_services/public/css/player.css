@@ -11,7 +11,7 @@
 
 ul.azure-media-xblock-transcript-cues {
     list-style: none !important;
-    padding-left: 11111111110 !important;
+    padding-left: 10 !important;
     height: 448px ;
     overflow-y: auto;
 }
