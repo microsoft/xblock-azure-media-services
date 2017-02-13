@@ -181,7 +181,7 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   //      transcript as part of our server-side model. This would
   //      mean a service-to-servie call, but would allow for some
   //      servers-side caching too.
-  var html = '<ol class="subtitles-menu">';
+  var html = '<ol class="subtitles-menu" style="list-style:none">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
     html += '<li data-transcript-element-id="' + cue.id
