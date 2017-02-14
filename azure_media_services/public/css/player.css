@@ -1,8 +1,9 @@
 /* Copyright (c) Microsoft Corporation. All Rights Reserved.
  * Licensed under the MIT license. See LICENSE file on the project webpage for details.
  */
- .wrapper-xblock.level-element .xblock-render {
-	height: 560px !important;
+.wrapper-xblock.level-element .xblock-render {
+	height: 567px !important;
+	background: #f0f3f5;
 } 
  .azure-media-player.floating {
     float: left;
@@ -10,7 +11,9 @@
 
 ul.azure-media-xblock-transcript-cues {
     list-style: none !important;
-    padding-left: 0 !important;
+    padding-left: 10 !important;
+    height: 448px ;
+    overflow-y: auto;
 }
 
 li.azure-media-xblock-transcript-cue {
@@ -19,17 +22,22 @@ li.azure-media-xblock-transcript-cue {
 
 .azure-media-player-transcript-pane {
     padding-left: 10px;
-    height: 448px;
-    overflow-y: auto;
-	display: none;
+    display: none;
 }
 
 .azure-media-xblock-transcript-element {
     cursor: pointer;
+    font-size: 14px;
+    color: #0074b5;
+}
+
+.azure-media-xblock-transcript-element:hover {
+    text-decoration: underline;
 }
 
 .azure-media-xblock-transcript-element.active {
-    background-color: #cccccc;
+    color: black;
+    font-weight: bold;
 }
 
 .azure-media-player-panel-height{
@@ -47,19 +55,22 @@ li.azure-media-xblock-transcript-cue {
 .azure-media-player-toggle-button-style {
 	top: 9px;
 	outline: none;
-	position: relative;
 	cursor: pointer;
 	float: left;
 	text-align: center;
 	vertical-align: middle;
 	margin: 0;
-	padding: 0;
+	padding-top: 9px;
 	height: 28px;
 	width: 28px;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	float: right;
 	font-size: 13px;
+}
+
+.azure-media-player-toggle-button-style:hover {
+        background-color: rgba(255,255,255,.1);
 }
 
 .transcript-download-btn-style{
@@ -98,6 +109,7 @@ li.azure-media-xblock-transcript-cue {
     float: left;
     border-radius: 3px;
     padding: 15px;
+    background-color: white;
 }
 
 
