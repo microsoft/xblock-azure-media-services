@@ -5,13 +5,12 @@
  .azure-media-player-toggle-button-style {
 	top: 9px;
 	outline: none;
-	position: relative;
 	cursor: pointer;
 	float: left;
 	text-align: center;
 	vertical-align: middle;
 	margin: 0;
-	padding: 0;
+	padding-top: 9px;
 	height: 28px;
 	width: 28px;
 	-webkit-font-smoothing: antialiased;
@@ -21,4 +20,7 @@
 }
 .azuremediaplayer {
     border: 0 !important;
+}
+.azure-media-player-toggle-button-style:hover {
+	background-color: rgba(255,255,255,.1);
 }

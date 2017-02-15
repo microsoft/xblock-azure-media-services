@@ -14,11 +14,8 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.pause,
       function(evt) {
-        _sendPlayerEvent(
-          eventPostUrl,
-          'edx.video.paused',
-          {}
-        );
+        _sendPlayerEvent(eventPostUrl, 'edx.video.paused', {});
+
         if (timeHandler !== null) {
           clearInterval(timeHandler);
         }
@@ -27,11 +24,8 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.play,
       function(evt) {
-        _sendPlayerEvent(
-          eventPostUrl,
-          'edx.video.played',
-          {}
-        );
+        _sendPlayerEvent(eventPostUrl, 'edx.video.played', {});
+
         timeHandler = setInterval(
           function() {
             _syncTimer(self, transcript_cues, element);
@@ -56,47 +50,30 @@ function AzureMediaServicesBlock(runtime, element) {
 
             if (transcriptContainerVisibility === "none") {
               event_type = 'edx.video.transcript.hidden';
-
               $('.video').addClass('closed')
             } else {
               event_type = 'edx.video.transcript.show';
-
               $('.video').removeClass('closed')
             }
 
-            _sendPlayerEvent(
-              eventPostUrl,
-              event_type,
-              {}
-            );
+            _sendPlayerEvent(eventPostUrl, event_type, {});
           });
         }
 
-        _sendPlayerEvent(
-          eventPostUrl,
-          'edx.video.loaded',
-          {}
-        );
+        _sendPlayerEvent(eventPostUrl, 'edx.video.loaded', {});
       }
     );
 
     this.addEventListener(amp.eventName.seeked,
       function(evt) {
-        _sendPlayerEvent(
-          eventPostUrl,
-          'edx.video.position.changed',
-          {}
-        );
+        _sendPlayerEvent(eventPostUrl, 'edx.video.position.changed', {});
       }
     );
 
     this.addEventListener(amp.eventName.ended,
       function(evt) {
-        _sendPlayerEvent(
-          eventPostUrl,
-          'edx.video.stopped',
-          {}
-        );
+        _sendPlayerEvent(eventPostUrl, 'edx.video.stopped', {});
+
         if (timeHandler !== null) {
           clearInterval(timeHandler);
         }
@@ -116,8 +93,8 @@ function AzureMediaServicesBlock(runtime, element) {
       xhr.send();
     }
 
-    // Sink events when the user clicks to show a subtitle.
-    // NOTE that we are sinking events from the Azure Media Player, so
+    // Sync events when closed captions (subtitles) are available.
+    // NOTE that we are syncing events from the Azure Media Player, so
     // this could change over time (i.e. class names changing)
     var subtitle_els = $(element).find('.vjs-subtitles-button .vjs-menu-item');
 
@@ -130,13 +107,7 @@ function AzureMediaServicesBlock(runtime, element) {
         language_name = '';
       }
 
-      _sendPlayerEvent(
-        eventPostUrl,
-        event_type,
-        {
-          language_name: language_name
-        }
-      )
+      _sendPlayerEvent(eventPostUrl, event_type, { language_name: language_name });
     });
   });
 }
@@ -181,22 +152,27 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   //      transcript as part of our server-side model. This would
   //      mean a service-to-servie call, but would allow for some
   //      servers-side caching too.
-  var html = '<ol class="subtitles-menu" style="list-style:none">';
+  var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
     html += '<li data-transcript-element-id="' + cue.id
-          + '" data-transcript-element-start-time="' + cue.startTime
-          + '" class="azure-media-xblock-transcript-element" >'
-          + cue.text + '</li>';
+      + '" data-transcript-element-start-time="' + cue.startTime
+      + '" class="azure-media-xblock-transcript-element" >'
+      + cue.text + '</li>';
   }
   html += '</ol>';
   transcriptPaneEl.append(html);
 
   // handle events when user clicks on transcripts
   $('.azure-media-xblock-transcript-element').click(function(evt) {
-    var start_time = parseFloat($(evt.target).data('transcript-element-start-time'));
+    // Clear all active
+    $('.azure-media-xblock-transcript-element').removeClass('current');
 
-    // set the player to match the transcript time
+    // Highlight the one the user clicked.
+    $(evt.target).addClass('current');
+
+    // Set the player to match the transcript time
+    var start_time = parseFloat($(evt.target).data('transcript-element-start-time'));
     player.currentTime(start_time);
   })
 
@@ -218,32 +194,26 @@ function _syncTimer(player, transcript_cues, element) {
   // see if there is a match
   for (var i = 0; i < transcript_cues.length; i++) {
     cue = transcript_cues[i];
+
     if (currentTime >= cue.startTime && currentTime < cue.endTime) {
       var targetEl = $('li[data-transcript-element-id=' + cue.id + ']');
       var isActive = targetEl.hasClass('current');
 
       if (!isActive) {
-        // highlight the correct one
+        // Highlight the correct one
         $('.azure-media-xblock-transcript-element').removeClass('current');
         targetEl.addClass('current');
-        // after getting highlighted one, below one wil autoscroll.
-        var topPositionOfActiveElement = targetEl.position().top;
-        var transcriptPanelVisibleAreaHeight = transcriptPaneEl[0].clientHeight;
-        var halfOfTranscriptPanelContainer = transcriptPanelVisibleAreaHeight / 2;
-        if (topPositionOfActiveElement !== 0 &&
-          topPositionOfActiveElement > halfOfTranscriptPanelContainer &&
-          topPositionOfActiveElement > transcriptPanelVisibleAreaHeight) {
-          var newScrollTopPosition = Math.ceil(transcriptPanelVisibleAreaHeight / 6);
-          $('.azure-media-player-transcript-pane')[0].scrollTop += newScrollTopPosition;
+
+        // After getting highlighted one, below autoscroll.
+        var iNdex = $('.azure-media-xblock-transcript-element .current').data('transcript-element-id');
+        if (iNdex && iNdex !== '') {
+          $('.subtitles-menu').scrollTo(iNdex * 29.5, 1000);
         }
       }
+
       return;
     }
   }
-
-  // clear all - video is not currently at a point which has a current
-  // translation
-  $('.azure-media-xblock-transcript-element').removeClass('current');
 }
 
 function _sendPlayerEvent(eventPostUrl, name, data) {
