@@ -80,14 +80,14 @@ function AzureMediaServicesBlock(runtime, element) {
       }
     );
 
-    transcriptPaneEl = $(element).find('.subtitles');
+    transcriptElement = $(element).find('.subtitles');
 
-    if (transcriptPaneEl.length) {
+    if (transcriptElement.length) {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', transcriptPaneEl.data('transcript-url'));
+      xhr.open('GET', transcriptElement.data('transcript-url'));
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-          transcript_cues = initTranscript(self, xhr.responseText, transcriptPaneEl);
+          transcript_cues = initTranscript(self, xhr.responseText, transcriptElement);
         }
       };
       xhr.send();
@@ -112,7 +112,7 @@ function AzureMediaServicesBlock(runtime, element) {
   });
 }
 
-function initTranscript(player, transcript, transcriptPaneEl) {
+function initTranscript(player, transcript, transcriptElement) {
   var parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
 
   var cues = [];
@@ -133,25 +133,13 @@ function initTranscript(player, transcript, transcriptPaneEl) {
   }
   catch (e) {
     //todo:remove when firefox bug is fixed.
-    transcriptPaneEl.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
-    transcriptPaneEl.append('<span><p>error From File: ' + e.fileName + '</p></span><br/>');
-    transcriptPaneEl.append('<span><p>errorMessage: ' + e.message + '</p></span><br/>');
+    transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
+    transcriptElement.append('<span><p>error From File: ' + e.fileName + '</p></span><br/>');
+    transcriptElement.append('<span><p>errorMessage: ' + e.message + '</p></span><br/>');
   }
   parser.flush();
 
-  // In general, markup that's driven by a data model should either be fully separated
-  // from script OR fully integrated (like react). We should therefore either:
-  //
-  // a) switch to a client-side templating solution for this (like handlebars,
-  //      mustache, underscore, etc). The most sensible approach is to
-  //      TODO: use Backbone's views since edx uses backbone.
-  //
-  //  OR
-  //
-  // b) continue following the django MVC solution by loading the
-  //      transcript as part of our server-side model. This would
-  //      mean a service-to-servie call, but would allow for some
-  //      servers-side caching too.
+  // TODO: use Backbone's client-side templating view (underscore)
   var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
@@ -161,7 +149,7 @@ function initTranscript(player, transcript, transcriptPaneEl) {
       + cue.text + '</li>';
   }
   html += '</ol>';
-  transcriptPaneEl.append(html);
+  transcriptElement.append(html);
 
   // handle events when user clicks on transcripts
   $('.azure-media-xblock-transcript-element').click(function(evt) {
@@ -196,18 +184,18 @@ function _syncTimer(player, transcript_cues, element) {
     cue = transcript_cues[i];
 
     if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-      var targetEl = $('li[data-transcript-element-id=' + cue.id + ']');
-      var isActive = targetEl.hasClass('current');
+      var targetElement = $('li[data-transcript-element-id=' + cue.id + ']');
+      var isActive = targetElement.hasClass('current');
 
       if (!isActive) {
         // Highlight the correct one
         $('.azure-media-xblock-transcript-element').removeClass('current');
-        targetEl.addClass('current');
+        targetElement.addClass('current');
 
-        // After getting highlighted one, below autoscroll.
-        var iNdex = $('.azure-media-xblock-transcript-element .current').data('transcript-element-id');
+        // Autoscroll
+        var iNdex = targetElement.data('transcript-element-id');
         if (iNdex && iNdex !== '') {
-          $('.subtitles-menu').scrollTo(iNdex * 29.5, 1000);
+          $('.subtitles').scrollTo(iNdex * 29.5, 1000);
         }
       }
 
