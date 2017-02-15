@@ -165,21 +165,20 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_content(loader.render_mako_template('/templates/player.html', context))
 
         '''
-        @TODO: Note: DO NOT USE the "latest" folder in production. Replace "latest" with a version number like "1.0.0"
-        EX:<script src="//amp.azure.net/libs/amp/1.0.0/azuremediaplayer.min.js"></script>
-        Azure Media Player versions can be queried from //aka.ms/ampchangelog
+        Note: DO NOT USE the "latest" folder in production, but specify a version
+                from https://aka.ms/ampchangelog. This allows us to run a test
+                pass prior to ingesting later versions.
         '''
-        fragment.add_css_url('//amp.azure.net/libs/amp/latest/skins/amp-default/azuremediaplayer.min.css')
-        fragment.add_javascript_url('//amp.azure.net/libs/amp/latest/azuremediaplayer.min.js')
+        fragment.add_css_url('//amp.azure.net/libs/amp/1.8.1/skins/amp-default/azuremediaplayer.min.css')
+        fragment.add_javascript_url('//amp.azure.net/libs/amp/1.8.1/azuremediaplayer.min.js')
 
-        fragment.add_javascript(loader.load_unicode('/static/js/player.js'))
+        fragment.add_javascript(loader.load_unicode('static/js/player.js'))
 
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/player.css'))
+        fragment.add_css(loader.load_unicode('public/css/player.css'))
 
         # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
         # actually need to include our local copy of public/js/vendor/vtt.js. In fact, if we do
         # the overlay subtitles stop working
-
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing

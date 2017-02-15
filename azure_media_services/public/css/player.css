@@ -1,56 +1,6 @@
 /* Copyright (c) Microsoft Corporation. All Rights Reserved.
  * Licensed under the MIT license. See LICENSE file on the project webpage for details.
  */
-.wrapper-xblock.level-element .xblock-render {
-	height: 567px !important;
-	background: #f0f3f5;
-} 
- .azure-media-player.floating {
-    float: left;
-}
-
-ul.azure-media-xblock-transcript-cues {
-    list-style: none !important;
-    padding-left: 10 !important;
-    height: 448px ;
-    overflow-y: auto;
-}
-
-li.azure-media-xblock-transcript-cue {
-    margin-bottom: 0.25em !important;
-}
-
-.azure-media-player-transcript-pane {
-    padding-left: 10px;
-    display: none;
-}
-
-.azure-media-xblock-transcript-element {
-    cursor: pointer;
-    font-size: 14px;
-    color: #0074b5;
-}
-
-.azure-media-xblock-transcript-element:hover {
-    text-decoration: underline;
-}
-
-.azure-media-xblock-transcript-element.active {
-    color: black;
-    font-weight: bold;
-}
-
-.azure-media-player-panel-height{
-    height:448px;
-}
-.azure-media-player-max-screen-width{
-  width:830px !important ;
-}
-
-.azure-media-player-min-screen-width{
-  width:550px !important;
-  height:448px !important;
-}
 
 .azure-media-player-toggle-button-style {
 	top: 9px;
@@ -68,48 +18,9 @@ li.azure-media-xblock-transcript-cue {
 	float: right;
 	font-size: 13px;
 }
-
+.azuremediaplayer {
+    border: 0 !important;
+}
 .azure-media-player-toggle-button-style:hover {
-        background-color: rgba(255,255,255,.1);
+	background-color: rgba(255,255,255,.1);
 }
-
-.transcript-download-btn-style{
-    padding-right: 20px;
-    padding-top: 15px;
-    float:left;
-}
-
-.transcript-download-btn-style a:visited {
-    color: #fff !important;
-    background-color: #0072c6;
-}
-.transcript-download-btn-style a:hover {
-    color: #fff !important;
-    background-color: #0072c6;
-}
-
-.xblock-media-services-height{
-    height: 344px;
-}
-
-.azure-media-wrraper-download-container {
-    width: 100%;
-	float: left;
-}
-.azure-media-button-container {
-    margin-top:14px;
-    width: 100%;
-}
-
-.azure-media-button-style {
-    padding-left: 21px;
-    margin: 0px 10px 2px 0;
-    font-size: 14px;
-    line-height: 14px;
-    float: left;
-    border-radius: 3px;
-    padding: 15px;
-    background-color: white;
-}
-
-

@@ -2,42 +2,50 @@
   Copyright (c) Microsoft Corporation. All Rights Reserved.
   Licensed under the MIT license. See LICENSE file on the project webpage for details.
   -->
-<div class='azure-media-services-xblock'>
-<%
-    floating_class = ' floating' if transcript_url else ''
-%>
-    <div class='azure-media-player${floating_class}'>
-        <video id="azure-media-services-xblock-video" class="azuremediaplayer amp-default-skin amp-big-play-centered"
-            data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false},"width":830 , "height": 507 }'>
-            <source
-                src="${video_url}"
-                type="application/vnd.ms-sstr+xml"
+
+<div class="xmodule_display xmodule_VideoModule">
+<div class="video closed">
+
+    <div class="tc-wrapper">
+        <div class="azuremediaplayer">
+            <video id="azure-media-services-xblock-video"
+                class="amp-default-skin amp-big-play-centered video-wrapper"
+                data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
+                <source
+                    src="${video_url}"
+                    type="application/vnd.ms-sstr+xml"
 % if protection_type:
-                data-setup='{"protectionInfo": [{"type": "${protection_type}", "authenticationToken": "Bearer=${auth_token}"}]}'
+                    data-setup='{"protectionInfo": [{"type": "${protection_type}", "authenticationToken": "Bearer=${auth_token}"}]}'
 % endif
-            />
+                />
 
 % for caption in captions:
-            <track kind="${caption['kind']}" src="${caption['src']}" srclang="${caption['srclang']}" label="${caption['label']}" />
+                <track kind="${caption['kind']}" src="${caption['src']}" srclang="${caption['srclang']}" label="${caption['label']}" />
 % endfor
 
-        </video>
-    </div>
+            </video>
+        </div>
+
 % if transcript_url:
-    <div class='azure-media-player-transcript-pane' data-transcript-url="${transcript_url}">
+        <div class="subtitles" data-transcript-url="${transcript_url}" style="display: none;">
+        </div>
+% endif
     </div>
+
+<ul class="wrapper-downloads">
+
+% if download_url:
+	<li class="video-sources video-download-button">
+		<a href="${download_url}">Download video</a>
+	</li>
+% endif
+% if transcript_url:
+	<li class="video-tracks video-download-button">
+		<a href="${transcript_url}">Download transcript</a>
+	</li>
 % endif
 
-<div class="wrapper-downloads azure-media-wrraper-download-container">
-% if download_url:
-	<div class="video-sources transcript-download-btn-style">
-		<a class="azure-media-button-style" href="${download_url}">Download video</a>
-	</div>
-% endif
-% if transcript_url:
-	<div class="video-tracks transcript-download-btn-style">
-		<a class ="azure-media-button-style" href="${transcript_url}">Download transcript</a>
-	</div>
-% endif
+</ul>
+
 </div>
 </div>
