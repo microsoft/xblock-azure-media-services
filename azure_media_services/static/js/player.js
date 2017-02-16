@@ -7,6 +7,8 @@ function AzureMediaServicesBlock(runtime, element) {
     var self = this
     var transcript_cues = null;
 
+    $('#azure-media-services-xblock-video').css('width', '');
+
     // Add event handlers
     var eventPostUrl = runtime.handlerUrl(element, 'publish_event');
 
@@ -37,8 +39,6 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
-        $('#azure-media-services-xblock-video').css('width', '');
-
         if ($('.subtitles').length) {
           var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
           $(".amp-controlbaricons-right").append(divContainer);
