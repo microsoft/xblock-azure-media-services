@@ -143,12 +143,12 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 			secret,
 			algorithm='HS256'
 		)
-		else:
-		    auth_token = self.verification_key
+	    else:
+	        auth_token = self.verification_key
 				
-		context.update({
-			"auth_token": auth_token,
-		})
+	    context.update({
+		"auth_token": auth_token,
+	    })
 
         return context
 
