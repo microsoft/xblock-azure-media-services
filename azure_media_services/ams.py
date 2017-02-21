@@ -126,29 +126,9 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         }
 
         if self.protection_type:
-            if self.protection_type == 'AES':
-                # Create a JWT authentication token to have the Azure Media Services
-                # create necessary DRM licenses
-
-                secret = base64.b64decode(self.verification_key)
-
-                payload = {
-                    u"iss": unicode(self.token_issuer),
-                    u"aud": unicode(self.token_scope),
-                    u"exp": int(time.time()) + (self.token_expiry_mins * 60),
-                }
-
-                auth_token = jwt.encode(
-                    payload,
-                    secret,
-                    algorithm='HS256'
-                )
-            else:
-                auth_token = self.verification_key
-				
-	    context.update({
-		    "auth_token": auth_token,
-	    })
+    	    context.update({
+	    	    "auth_token": self.verification_key,
+	        })
 
         return context
 
