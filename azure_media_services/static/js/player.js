@@ -2,7 +2,10 @@
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
 function AzureMediaServicesBlock(runtime, element) {
-  var player = amp('azure-media-services-xblock-video', null, function() {
+  //
+  // IMPORTANT: We pass the element itself instead of the class or id. There is a bug when switching units (away from and back to xblock).
+  //
+  var player = amp($(element).find('#azure-media-services-xblock-video')[0], null, function() {
     // This will get filled in by the transcript processor
     var self = this
     var transcript_cues = null;
