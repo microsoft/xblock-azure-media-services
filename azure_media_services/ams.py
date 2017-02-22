@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
 """
-XBlock to allow for video playback from Amazon Media Services
+XBlock to allow for video playback from Azure Media Services
 
 Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.html
 """
@@ -26,6 +26,8 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 log = logging.getLogger(__name__)
 
+# According to edx-platform vertical xblocks
+CLASS_PRIORITY = ['video']
 
 @XBlock.needs('i18n')
 class AMSXBlock(StudioEditableXBlockMixin, XBlock):
@@ -168,7 +170,19 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         fragment.initialize_js('AzureMediaServicesBlock')
         return fragment
-
+    
+    # xblock runtime navigation tab video image
+    def get_icon_class(self):
+        """
+        Returns the highest priority icon class.
+        """
+        child_classes = set(child.get_icon_class() for child in self.get_children())
+        new_class = 'video'
+        for higher_class in CLASS_PRIORITY:
+            if higher_class in child_classes:
+                new_class = higher_class
+        return new_class
+    
     @XBlock.json_handler
     def publish_event(self, data, suffix=''):
         try:
