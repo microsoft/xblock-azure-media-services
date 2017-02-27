@@ -5,12 +5,12 @@ function AzureMediaServicesBlock(runtime, element) {
   //
   // IMPORTANT: We pass the element itself instead of the class or id. There is a bug when switching units (away from and back to xblock).
   //
-  var player = amp($(element).find('#azure-media-services-xblock-video')[0], null, function() {
+  var player = amp($(element).find('.amp-big-play-centered')[0], null, function() {
     // This will get filled in by the transcript processor
     var self = this
     var transcript_cues = null;
 
-    $('#azure-media-services-xblock-video').css('width', '');
+    $('.amp-big-play-centered').css('width', '');
 
     // Add event handlers
     var eventPostUrl = runtime.handlerUrl(element, 'publish_event');
