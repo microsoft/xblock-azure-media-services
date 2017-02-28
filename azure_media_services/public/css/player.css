@@ -31,3 +31,18 @@
 .xmodule_display.xmodule_SequenceModule .sequence-nav ol li button.seq_other .icon:before {
     content: "\f008" !important;
 }
+
+/*google chrome compatibility*/
+.amp-default-skin.vjs-fullscreen {
+    height: 100% !important;
+}
+
+.xmodule_display.xmodule_VideoModule .video .video-wrapper {
+   margin-right: 0 !important;
+}
+
+/*closed caption overlay with control bar*/
+.azuremediaplayer .vjs-text-track-display {
+   bottom: 5em !important;
+}
+
