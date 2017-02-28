@@ -48,3 +48,7 @@
    bottom: 5em !important;
 }
 
+.amp-default-skin.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar {
+   transition: visibility 5s linear, opacity 5s linear;
+}
+
