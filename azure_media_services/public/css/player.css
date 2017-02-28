@@ -23,6 +23,10 @@
     border: 0 !important;
 }
 
+.xmodule_display.xmodule_VideoModule .video .subtitles {
+   padding-left: 10px;
+}
+
 .azure-media-player-toggle-button-style:hover {
     background-color: rgba(255, 255, 255, .1);
 }
@@ -32,7 +36,6 @@
     content: "\f008" !important;
 }
 
-/*google chrome compatibility*/
 .amp-default-skin.vjs-fullscreen {
     height: 100% !important;
 }
@@ -41,7 +44,6 @@
    margin-right: 0 !important;
 }
 
-/*closed caption overlay with control bar*/
 .azuremediaplayer .vjs-text-track-display {
    bottom: 5em !important;
 }
