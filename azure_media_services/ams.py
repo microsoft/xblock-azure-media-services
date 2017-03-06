@@ -74,7 +74,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         help=_(
             "This value must match what is in the 'Content Protection' area of the Azure Media Services portal"
         ),
-        default="http://open.edx.org/",
+        default="http://openedx.microsoft.com/",
         scope=Scope.settings
     )
     token_scope= String(
@@ -83,14 +83,6 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "This value must match what is in the 'Content Protection' area of the Azure Media Services portal"
         ),
         default="urn:xblock-azure-media-services",
-        scope=Scope.settings
-    )
-    token_expiry_mins= Integer(
-        display_name=_("Token Expiry (mins)"),
-        help=_(
-            "This set the duration that the security authorization token is good for. Default is 10 minutes"
-        ),
-        default=10,
         scope=Scope.settings
     )
     captions = List(
@@ -112,7 +104,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     # These are what become visible in the Mixin editor
     editable_fields = (
         'display_name', 'video_url', 'verification_key', 'protection_type',
-        'token_issuer', 'token_scope', 'token_expiry_mins', 'captions', 'transcript_url', 'download_url',
+        'token_issuer', 'token_scope', 'captions', 'transcript_url', 'download_url',
     )
 
     def _get_context_for_template(self):
