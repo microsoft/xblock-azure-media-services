@@ -42,18 +42,17 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
-        if ($('.subtitles').length) {
-          var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
-          $(".amp-controlbaricons-right").append(divContainer);
-
-          $('#toggleTranscript').on('click keydown',(function(evt) {
-		  var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
-		  if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13))
+	   	    if ($('.subtitles').length) {
+			var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
+			$(".amp-controlbaricons-right").append(divContainer);
+			$('#toggleTranscript').on('click keydown',(function(evt) {
+			var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
+			if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13))
 			  return;
-	  }
-		  if (keycode === 32) {
+			}
+			if (keycode === 32) {
 			  evt.preventDefault();
- 	  }
+			}
             $('.subtitles').toggle();
             var transcriptContainerVisibility = $('.subtitles')[0].style.display;
             var event_type = ''
@@ -163,7 +162,14 @@ function initTranscript(player, transcript, transcriptElement) {
 
   // handle events when user clicks on transcripts
   $('.azure-media-xblock-transcript-element').on('click keypress',function(evt) {
-	  console.log('Select Transcript cue',evt);
+	var KeyCode = (evt.type === 'keydown' && evt.keyCode ? evt.keyCode : evt.which)
+    if (evt.type !== 'click' && (KeyCode !== 32 && KeyCode !== 13)) {
+    return;
+    }
+    if (KeyCode === 32) {
+    evt.preventDefault();
+    }
+
     // Clear all active
     $('.azure-media-xblock-transcript-element').removeClass('current');
 
