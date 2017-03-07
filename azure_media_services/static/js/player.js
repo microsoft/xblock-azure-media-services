@@ -46,14 +46,12 @@ function AzureMediaServicesBlock(runtime, element) {
           var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
           $(".amp-controlbaricons-right").append(divContainer);
 
-          $('#toggleTranscript').on('click Keydown',(function(evt) {
+          $('#toggleTranscript').on('click keydown',(function(evt) {
 		  var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
-		  console.log('keycode:',keycode);
 		  if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13))
 			  return;
 	  }
 		  if (keycode === 32) {
-			  console.log('Hit Spacebar');
 			  evt.preventDefault();
  	  }
             $('.subtitles').toggle();
