@@ -47,7 +47,7 @@ function AzureMediaServicesBlock(runtime, element) {
 			$(".amp-controlbaricons-right").append(divContainer);
 			$('#toggleTranscript').on('click keydown',(function(evt) {
 			var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
-			if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13))
+			if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
 			  return;
 			}
 			if (keycode === 32) {
@@ -66,7 +66,7 @@ function AzureMediaServicesBlock(runtime, element) {
             }
 
             _sendPlayerEvent(eventPostUrl, event_type, {});
-          });
+          }));
         }
 
         _sendPlayerEvent(eventPostUrl, 'edx.video.loaded', {});
