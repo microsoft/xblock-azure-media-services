@@ -143,8 +143,8 @@ function initTranscript(player, transcript, transcriptElement) {
   catch (e) {
     //todo:remove when firefox bug is fixed.
     transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
-    transcriptElement.append('<span><p>error From File: ' + e.fileName + '</p></span><br/>');
-    transcriptElement.append('<span><p>errorMessage: ' + e.message + '</p></span><br/>');
+    transcriptElement.append('<span><p>error From File: ' + _.escape(error.fileName) + '</p></span><br/>');
+    transcriptElement.append('<span><p>errorMessage: ' + _.escape(error.message) + '</p></span><br/>');
   }
   parser.flush();
 
@@ -152,10 +152,10 @@ function initTranscript(player, transcript, transcriptElement) {
   var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
-    html += '<li data-transcript-element-id="' + cue.id
-      + '" data-transcript-element-start-time="' + cue.startTime
+    html += '<li tabindex="0" data-transcript-element-id="' + _.escape(cue.id)
+      + '" data-transcript-element-start-time="' + _.escape(cue.startTime)
       + '" class="azure-media-xblock-transcript-element" >'
-      + cue.text + '</li>';
+      + _.escape(cue.text) + '</li>';
   }
   html += '</ol>';
   transcriptElement.append(html);
@@ -201,7 +201,7 @@ function _syncTimer(player, transcript_cues, element) {
     cue = transcript_cues[i];
 
     if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-      var targetElement = $('li[data-transcript-element-id=' + cue.id + ']');
+      var targetElement = $('li[data-transcript-element-id=' + _.escape(cue.id) + ']');
       var isActive = targetElement.hasClass('current');
 
       if (!isActive) {
