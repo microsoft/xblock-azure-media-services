@@ -152,7 +152,7 @@ function initTranscript(player, transcript, transcriptElement) {
   var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
-    html += '<li tabindex="0" data-transcript-element-id="' + _.escape(cue.id)
+    html += '<li role="link" tabindex="0" data-transcript-element-id="' + _.escape(cue.id)
       + '" data-transcript-element-start-time="' + _.escape(cue.startTime)
       + '" class="azure-media-xblock-transcript-element" >'
       + _.escape(cue.text) + '</li>';
