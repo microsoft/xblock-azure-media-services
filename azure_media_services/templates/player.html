@@ -35,12 +35,12 @@
 <ul class="wrapper-downloads">
 
 % if download_url:
-	<li class="video-sources video-download-button">
+	<li style="list-style-type: none;" class="video-sources video-download-button">
 		<a role:"button" href="${download_url}" download>Download video</a>
 	</li>
 % endif
 % if transcript_url:
-	<li class="video-tracks video-download-button">
+	<li style="list-style-type: none;" class="video-tracks video-download-button">
 		<a role:"button" href="${transcript_url}" download>Download transcript</a>
 	</li>
 % endif
