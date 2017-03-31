@@ -152,7 +152,8 @@ function initTranscript(player, transcript, transcriptElement) {
   var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
-    html += '<li role="link" tabindex="0" data-transcript-element-id="' + _.escape(cue.id)
+    var j = i+1;
+    html += '<li role="link" tabindex="0" data-transcript-element-id="' + _.escape(j)
       + '" data-transcript-element-start-time="' + _.escape(cue.startTime)
       + '" class="azure-media-xblock-transcript-element" >'
       + _.escape(cue.text) + '</li>';
@@ -199,9 +200,9 @@ function _syncTimer(player, transcript_cues, element) {
   // see if there is a match
   for (var i = 0; i < transcript_cues.length; i++) {
     cue = transcript_cues[i];
-
+    var j = i+1;
     if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-      var targetElement = $('li[data-transcript-element-id=' + _.escape(cue.id) + ']');
+      var targetElement = $('li[data-transcript-element-id=' + _.escape(j) + ']');
       var isActive = targetElement.hasClass('current');
 
       if (!isActive) {
