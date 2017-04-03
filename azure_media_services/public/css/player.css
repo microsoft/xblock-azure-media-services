@@ -31,8 +31,7 @@
     background-color: rgba(255, 255, 255, .1);
 }
 
-.xmodule_display.xmodule_SequenceModule .sequence-nav ol li button.seq_video .icon:before,
-.xmodule_display.xmodule_SequenceModule .sequence-nav ol li button.seq_other .icon:before {
+.xmodule_display.xmodule_SequenceModule .sequence-nav ol li button.seq_video .icon:before {
     content: "\f008" !important;
 }
 
@@ -52,3 +51,6 @@
    transition: visibility 5s linear, opacity 5s linear;
 }
 
+li.video-tracks.video-download-button {
+   margin-left:10px !important;
+}
