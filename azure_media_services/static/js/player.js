@@ -73,15 +73,15 @@ function AzureMediaServicesBlock(runtime, container) {
 
             // Toggle transcript view.
             var event_type = ''
-            if (!$vidAndTranscript.hasClass('closed')) {
-              event_type = 'edx.video.transcript.hidden';
-              $vidAndTranscript.addClass('closed')
-            } else {
+            if ($vidAndTranscript.hasClass('closed')) {
               event_type = 'edx.video.transcript.show';
               $vidAndTranscript.removeClass('closed')
+            } else {
+              event_type = 'edx.video.transcript.hidden';
+              $vidAndTranscript.addClass('closed')
             }
 
-            // Log toggle transcript.
+            // Log toggle transcript event.
             _sendPlayerEvent(eventPostUrl, event_type, {});
           }));
         }
@@ -124,7 +124,7 @@ function AzureMediaServicesBlock(runtime, container) {
     var subtitle_els = $(container).find('.vjs-subtitles-button .vjs-menu-item');
 
     subtitle_els.mousedown(function(evt) {
-      // TODO: we shoul attach to a different event. This can be toggled via keyboard.
+      // TODO: we should attach to a different event. For example, this can also be toggled via keyboard.
       var target = $(evt.target);
       var language_name = target.html();
       var event_type = 'edx.video.closed_captions.shown';
@@ -157,7 +157,7 @@ function initTranscript(player, transcript, $transcriptElement) {
   try {
     parser.parse(transcript);
   }
-  catch (e) {
+  catch (error) {
     // TODO: remove when firefox bug is fixed.
     $transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
     $transcriptElement.append('<span><p>error From File: ' + _.escape(error.fileName) + '</p></span><br/>');
