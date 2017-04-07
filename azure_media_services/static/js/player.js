@@ -1,20 +1,33 @@
 // Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
-function AzureMediaServicesBlock(runtime, element) {
+function AzureMediaServicesBlock(runtime, container) {
   //
-  // IMPORTANT: We pass the element itself instead of the class or id. There is a bug when switching units (away from and back to xblock).
+  // IMPORTANT: We pass the <video> DOM element instead of its class or id. This mitigates
+  //  a bug when switching units. Changing units triggers a "partial navigation" which
+  //  entirely removes the xblock markup from the DOM.
   //
-  var player = amp($(element).find('.amp-big-play-centered')[0], null, function() {
+  var player = amp($(container).find('video')[0], null, function() {
+    // Preserve
+    var self = this;
+
+    // Fyi, container contains all of player.html so it is an ancestor of $vidAndTranscript
+    //      $vidAndTranscript is an ancestor of BOTH $vidParent AND $transcriptElement
+    //      $vidParent is the direct parent of <video> tag
+    var $vidAndTranscript = $(container).find('.video').first();
+    var $vidParent = $(self.el_);
+    var $transcriptElement = $vidAndTranscript.find('.subtitles').first();
+
     // This will get filled in by the transcript processor
-    var self = this
     var transcript_cues = null;
 
-    $('.amp-big-play-centered').css('width', '');
+    // Clear fixed width to support responsive UX.
+    $vidParent.css('width', '');
 
     // Add event handlers
-    var eventPostUrl = runtime.handlerUrl(element, 'publish_event');
+    var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
 
+    // This will be updated as the video plays.
     var timeHandler = null;
 
     this.addEventListener(amp.eventName.pause,
@@ -33,7 +46,7 @@ function AzureMediaServicesBlock(runtime, element) {
 
         timeHandler = setInterval(
           function() {
-            _syncTimer(self, transcript_cues, element);
+            _syncTimer(self, transcript_cues, $transcriptElement);
           },
           100
         );
@@ -42,29 +55,33 @@ function AzureMediaServicesBlock(runtime, element) {
 
     this.addEventListener(amp.eventName.loadeddata,
       function(evt) {
-	   	    if ($('.subtitles').length) {
-			var divContainer = $("<div class='azure-media-player-toggle-button-style fa fa-quote-left' id='toggleTranscript' role='button' aria-live='polite' tabindex='0'><div class='vjs-control-content'><span class='vjs-control-text'>Toggle</span></div></div>");
-			$(".amp-controlbaricons-right").append(divContainer);
-			$('#toggleTranscript').on('click keydown',(function(evt) {
-			var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
-			if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
-			  return;
-			}
-			if (keycode === 32) {
-			  evt.preventDefault();
-			}
-            $('.subtitles').toggle();
-            var transcriptContainerVisibility = $('.subtitles')[0].style.display;
-            var event_type = ''
+        if ($transcriptElement.length) {
+          // Find and re-position button markup. This must be done
+          // after AMP initializes built-in player controls.
+          var $transcriptButton = $transcriptElement.find('.toggleTranscript').first();
+          $vidParent.find('.amp-controlbaricons-right').first().append($transcriptButton);
 
-            if (transcriptContainerVisibility === "none") {
-              event_type = 'edx.video.transcript.hidden';
-              $('.video').addClass('closed')
-            } else {
-              event_type = 'edx.video.transcript.show';
-              $('.video').removeClass('closed')
+          // Enable button action.
+          $transcriptButton.on('click keydown', (function(evt) {
+            var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
+            if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
+              return;
+            }
+            if (keycode === 32) {
+              evt.preventDefault();
             }
 
+            // Toggle transcript view.
+            var event_type = ''
+            if ($vidAndTranscript.hasClass('closed')) {
+              event_type = 'edx.video.transcript.show';
+              $vidAndTranscript.removeClass('closed')
+            } else {
+              event_type = 'edx.video.transcript.hidden';
+              $vidAndTranscript.addClass('closed')
+            }
+
+            // Log toggle transcript event.
             _sendPlayerEvent(eventPostUrl, event_type, {});
           }));
         }
@@ -89,25 +106,25 @@ function AzureMediaServicesBlock(runtime, element) {
       }
     );
 
-    transcriptElement = $(element).find('.subtitles');
-
-    if (transcriptElement.length) {
+    // Ajax request for transcript file.
+    if ($transcriptElement.length) {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', transcriptElement.data('transcript-url'));
+      xhr.open('GET', $transcriptElement.data('transcript-url'));
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-          transcript_cues = initTranscript(self, xhr.responseText, transcriptElement);
+          // Parse transcript.
+          transcript_cues = initTranscript(self, xhr.responseText, $transcriptElement);
         }
       };
       xhr.send();
     }
 
-    // Sync events when closed captions (subtitles) are available.
-    // NOTE that we are syncing events from the Azure Media Player, so
-    // this could change over time (i.e. class names changing)
-    var subtitle_els = $(element).find('.vjs-subtitles-button .vjs-menu-item');
+    // Log when closed captions (subtitles) are toggled.
+    // NOTE we use classes from Azure Media Player which may change.
+    var subtitle_els = $(container).find('.vjs-subtitles-button .vjs-menu-item');
 
     subtitle_els.mousedown(function(evt) {
+      // TODO: we should attach to a different event. For example, this can also be toggled via keyboard.
       var target = $(evt.target);
       var language_name = target.html();
       var event_type = 'edx.video.closed_captions.shown';
@@ -121,7 +138,7 @@ function AzureMediaServicesBlock(runtime, element) {
   });
 }
 
-function initTranscript(player, transcript, transcriptElement) {
+function initTranscript(player, transcript, $transcriptElement) {
   var parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
 
   var cues = [];
@@ -140,39 +157,43 @@ function initTranscript(player, transcript, transcriptElement) {
   try {
     parser.parse(transcript);
   }
-  catch (e) {
-    //todo:remove when firefox bug is fixed.
-    transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
-    transcriptElement.append('<span><p>error From File: ' + _.escape(error.fileName) + '</p></span><br/>');
-    transcriptElement.append('<span><p>errorMessage: ' + _.escape(error.message) + '</p></span><br/>');
+  catch (error) {
+    // TODO: remove when firefox bug is fixed.
+    $transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
+    $transcriptElement.append('<span><p>error From File: ' + _.escape(error.fileName) + '</p></span><br/>');
+    $transcriptElement.append('<span><p>errorMessage: ' + _.escape(error.message) + '</p></span><br/>');
   }
   parser.flush();
 
+  // Creates transcript markup.
   // TODO: use Backbone's client-side templating view (underscore)
   var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
   for (var i = 0; i < cues.length; i++) {
     var cue = cues[i];
-    var j = i+1;
-    html += '<li role="link" tabindex="0" data-transcript-element-id="' + _.escape(j)
-      + '" data-transcript-element-start-time="' + _.escape(cue.startTime)
+
+    html += '<li role="link" tabindex="0"'
+      + 'data-transcript-element-start-time="' + _.escape(cue.startTime)
       + '" class="azure-media-xblock-transcript-element" >'
       + _.escape(cue.text) + '</li>';
   }
   html += '</ol>';
-  transcriptElement.append(html);
+  $transcriptElement.append(html);
 
-  // handle events when user clicks on transcripts
-  $('.azure-media-xblock-transcript-element').on('click keypress',function(evt) {
-	var KeyCode = (evt.type === 'keydown' && evt.keyCode ? evt.keyCode : evt.which)
+  // Gather each transcript phrase (each pseudo-hyperlink in transcript).
+  var $transcriptItems = $transcriptElement.find('.azure-media-xblock-transcript-element');
+
+  // Handle events when user clicks on transcripts
+  $transcriptItems.on('click keypress',function(evt) {
+    var KeyCode = (evt.type === 'keydown' && evt.keyCode ? evt.keyCode : evt.which)
     if (evt.type !== 'click' && (KeyCode !== 32 && KeyCode !== 13)) {
-    return;
+      return;
     }
     if (KeyCode === 32) {
-    evt.preventDefault();
+      evt.preventDefault();
     }
 
     // Clear all active
-    $('.azure-media-xblock-transcript-element').removeClass('current');
+    $transcriptItems.removeClass('current');
 
     // Highlight the one the user clicked.
     $(evt.target).addClass('current');
@@ -185,36 +206,39 @@ function initTranscript(player, transcript, transcriptElement) {
   return cues;
 }
 
-function _syncTimer(player, transcript_cues, element) {
+function _syncTimer(player, transcript_cues, $transcriptElement) {
   // This is called regularly while the video plays
   // so that we can correctly highlight the transcript elements
   // based on the current position of the video playback
 
-  if (transcript_cues === null) {
+  if (transcript_cues === null || !$transcriptElement.length) {
     // no transcript - quick exit
     return;
   }
 
+  // Gather each transcript phrase (each pseudo-hyperlink in transcript).
+  var $transcriptItems = $transcriptElement.find('.azure-media-xblock-transcript-element');
+
   var currentTime = player.currentTime();
 
-  // see if there is a match
+  // Simple linear search.
   for (var i = 0; i < transcript_cues.length; i++) {
     cue = transcript_cues[i];
-    var j = i+1;
-    if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-      var targetElement = $('li[data-transcript-element-id=' + _.escape(j) + ']');
-      var isActive = targetElement.hasClass('current');
 
+    if (currentTime >= cue.startTime && currentTime < cue.endTime) {
+      var $targetElement = $transcriptItems.eq(i);
+
+      var isActive = $targetElement.hasClass('current');
       if (!isActive) {
         // Highlight the correct one
-        $('.azure-media-xblock-transcript-element').removeClass('current');
-        targetElement.addClass('current');
+        $transcriptItems.removeClass('current');
+        $targetElement.addClass('current');
 
-        // Autoscroll
-        var iNdex = targetElement.data('transcript-element-id');
-        if (iNdex && iNdex !== '') {
-          $('.subtitles').scrollTo(iNdex * 29.5, 1000);
-        }
+        // Autoscroll.
+        // TODO: this formula is brittle. It uses "magic numbers." It should instead use
+        //    information from the layout like: $transcriptElement's height,
+        //    $transcriptElement's scroll-position, $targetElement's location, etc.
+        $transcriptElement.scrollTo((i + 1) * 29.5, 1000);
       }
 
       return;

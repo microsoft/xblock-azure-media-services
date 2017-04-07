@@ -8,9 +8,8 @@
 
     <div class="tc-wrapper">
         <div class="azuremediaplayer">
-            <video id="azure-media-services-xblock-video"
-                class="amp-default-skin amp-big-play-centered video-wrapper"
-                data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
+            <video class="amp-default-skin amp-big-play-centered video-wrapper"
+                   data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
                 <source
                     src="${video_url}"
                     type="application/vnd.ms-sstr+xml"
@@ -27,7 +26,11 @@
         </div>
 
 % if transcript_url:
-        <div class="subtitles" data-transcript-url="${transcript_url}" style="display: none;">
+        <div class="subtitles" data-transcript-url="${transcript_url}">
+            ## This element is re-parented dynamically after the AMP is initialized and other buttons are positioned.
+            <div class="azure-media-player-toggle-button-style fa fa-quote-left toggleTranscript" role="button" aria-live="polite" tabindex="0">
+                <div class="vjs-control-content"><span class="vjs-control-text">Toggle</span></div>
+            </div>
         </div>
 % endif
     </div>

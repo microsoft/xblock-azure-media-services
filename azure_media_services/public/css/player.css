@@ -54,3 +54,8 @@
 li.video-tracks.video-download-button {
    margin-left:10px !important;
 }
+
+/* "closed" is toggled by user action. Transcripts will appear when "closed" class is removed. */
+.closed .subtitles {
+    display: none;
+}
