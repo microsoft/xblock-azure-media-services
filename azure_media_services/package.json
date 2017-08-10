@@ -1,0 +1,7 @@
+{
+  "name": "ams_xblock",
+  "version": "oxa_v2.5.0",
+  "dependencies": {
+    "videojs-vtt.js": "0.12.4"
+  }
+}

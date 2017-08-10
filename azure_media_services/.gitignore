@@ -1,0 +1,7 @@
+
+node_modules/*
+!node_modules/videojs-vtt.js
+node_modules/videojs-vtt.js/*
+!node_modules/videojs-vtt.js/lib
+node_modules/videojs-vtt.js/lib/*
+!node_modules/videojs-vtt.js/lib/vttcue.js
