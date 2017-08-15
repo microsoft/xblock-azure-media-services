@@ -1,0 +1,13 @@
+{
+  "name": "ams_xblock",
+  "version": "0.2.0",
+  "description": "Azure Media Player XBlock",
+  "dependencies": {
+    "videojs-vtt.js": "0.12.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/xblock-azure-media-services.git"
+  },
+  "license": "MIT"
+}
