@@ -143,7 +143,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         '''
         Note: DO NOT USE the "latest" folder in production, but specify a version
-                from https://aka.ms/ampchangelog. This allows us to run a test
+                from https://aka.ms/ampchangelog . This allows us to run a test
                 pass prior to ingesting later versions.
         '''
         fragment.add_javascript(loader.load_unicode('node_modules/videojs-vtt.js/lib/vttcue.js'))

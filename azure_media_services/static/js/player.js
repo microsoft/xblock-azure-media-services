@@ -158,10 +158,8 @@ function initTranscript(player, transcript, $transcriptElement) {
     parser.parse(transcript);
   }
   catch (error) {
-    // TODO: remove when firefox bug is fixed.
-    $transcriptElement.append('<span><p>Known firefox bug. We have notified azure media player team.</p></span><br/>');
-    $transcriptElement.append('<span><p>error From File: ' + _.escape(error.fileName) + '</p></span><br/>');
-    $transcriptElement.append('<span><p>errorMessage: ' + _.escape(error.message) + '</p></span><br/>');
+    // TODO: remove when vtt bug is fixed.
+    $transcriptElement.append('<span><p>It appears there was a problem loading the transcript. Please see the support link located at the bottom of this page for additional help and information about browser compatibility. We apologize for the inconvenience.</p></span>');
   }
   parser.flush();
 
