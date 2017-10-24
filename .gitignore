@@ -14,4 +14,6 @@ codekit-config.json
 
 ### Testing artifacts
 .coverage
+coverage/
 var/
+node_modules/
