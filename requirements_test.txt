@@ -1,0 +1,11 @@
+# CI and tests requirements
+
+flake8==3.4.1
+flake8-docstrings>=1.1.0
+flake8-import-order>=0.13
+hacking==1.0.0
+
+nose>=1.3.7,<2.0.0
+coverage>=4.3.4,<5.0.0
+
+Django>=1.11,<2.0.0

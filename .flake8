@@ -1,0 +1,13 @@
+[flake8]
+# Ignoring requirements of the docstrings in public packages, classes, functions, etc.
+ignore =
+    D100, D101, D102, D103, D104, D105, D200
+    H404, H405
+exclude = .venv,.git
+max-complexity = 10
+format = %(path)s::%(row)d,%(col)d::%(code)s::%(text)s
+max-line-length = 120
+show-source = True
+statistics = True
+count = True
+import-order-style = google

@@ -1,3 +1,5 @@
+[![Circle CI Build: Status](https://img.shields.io/circleci/project/raccoongang/xblock-azure-media-services/dev.svg)](https://circleci.com/gh/raccoongang/xblock-azure-media-services/tree/dev)
+
 Azure Media Services xBlock
 ===========================
 
