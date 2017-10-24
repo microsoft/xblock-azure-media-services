@@ -10,4 +10,4 @@ class PackageTest(unittest.TestCase):
         """
         Test 1+1=2.
         """
-        self.assertEqual(1+1, 2)
+        self.assertEqual(1 + 1, 2)

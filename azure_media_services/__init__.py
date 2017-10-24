@@ -4,4 +4,4 @@
 """
 Runtime will load the XBlock class from here.
 """
-from .ams import AMSXBlock
+from .ams import AMSXBlock  # noqa: F401
