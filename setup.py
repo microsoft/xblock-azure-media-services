@@ -35,10 +35,10 @@ setup(
         'bleach',
         'mako',
         'XBlock',
-        'xblock-utils>=v1.0.0',
+        'xblock-utils==1.0.5',
     ],
     dependency_links=[
-        'https://github.com/edx/xblock-utils/tarball/c39bf653e4f27fb3798662ef64cde99f57603f79#egg=xblock-utils',
+        'git+https://github.com/edx/xblock-utils.git@v1.0.5#egg=xblock-utils-1.0.5',
     ],
     entry_points={
         'xblock.v1': [
