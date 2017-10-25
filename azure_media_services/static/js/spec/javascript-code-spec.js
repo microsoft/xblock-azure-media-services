@@ -7,6 +7,6 @@ describe('exspression: 1+1', function() {
     'use strict';
 
     it('return', function() {
-        expect(1+1).toEqual(2);
+        expect(1 + 1).toEqual(2);
     });
 });
