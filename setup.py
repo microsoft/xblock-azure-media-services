@@ -30,15 +30,13 @@ setup(
     packages=[
         'azure_media_services',
     ],
+    include_package_data=True,
     install_requires=[
         'PyJWT',
         'bleach',
         'mako',
         'XBlock',
-        'xblock-utils==1.0.5',
-    ],
-    dependency_links=[
-        'git+https://github.com/edx/xblock-utils.git@v1.0.5#egg=xblock-utils-1.0.5',
+        'azure==2.0.0',
     ],
     entry_points={
         'xblock.v1': [
