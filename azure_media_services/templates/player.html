@@ -11,44 +11,43 @@
             <video class="amp-default-skin amp-big-play-centered video-wrapper"
                    data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
                 <source
-                    src="${video_url}"
+                    src="{{ video_url }}"
                     type="application/vnd.ms-sstr+xml"
-% if protection_type:
-                    data-setup='{"protectionInfo": [{"type": "${protection_type}", "authenticationToken": "Bearer=${auth_token}"}]}'
-% endif
+                    {% if protection_type %}
+                    data-setup='{"protectionInfo": [{"type": "{{ protection_type }}", "authenticationToken": "Bearer={{ auth_token }}"}]}'
+                    {% endif %}
                 />
 
-% for caption in captions:
-                <track kind="${caption['kind']}" src="${caption['src']}" srclang="${caption['srclang']}" label="${caption['label']}" />
-% endfor
+                {% for caption in captions %}
+                <track kind="{{ caption.kind }}" src="{{ caption.src }}" srclang="{{ caption.srclang }}" label="{{ caption.label }}" />
+                {% endfor %}
 
             </video>
         </div>
 
-% if transcript_url:
-        <div class="subtitles" data-transcript-url="${transcript_url}">
-            ## This element is re-parented dynamically after the AMP is initialized and other buttons are positioned.
+        {% if transcript_url %}
+        <div class="subtitles" data-transcript-url="{{ transcript_url }}">
+{#            This element is re-parented dynamically after the AMP is initialized and other buttons are positioned.#}
             <div class="azure-media-player-toggle-button-style fa fa-quote-left toggleTranscript" role="button" aria-live="polite" tabindex="0">
                 <div class="vjs-control-content"><span class="vjs-control-text">Toggle</span></div>
             </div>
         </div>
-% endif
+        {% endif %}
     </div>
 
-<ul class="wrapper-downloads">
+    <ul class="wrapper-downloads">
+        {% if download_url %}
+        <li style="list-style-type: none;" class="video-sources video-download-button">
+            <a role="button" href="{{ download_url }}" download>Download video</a>
+        </li>
+        {% endif %}
 
-% if download_url:
-	<li style="list-style-type: none;" class="video-sources video-download-button">
-		<a role:"button" href="${download_url}" download>Download video</a>
-	</li>
-% endif
-% if transcript_url:
-	<li style="list-style-type: none;" class="video-tracks video-download-button">
-		<a role:"button" href="${transcript_url}" download>Download transcript</a>
-	</li>
-% endif
-
-</ul>
+        {% if transcript_url %}
+        <li style="list-style-type: none;" class="video-tracks video-download-button">
+            <a role="button" href="{{ transcript_url }}" download>Download transcript</a>
+        </li>
+        {% endif %}
+    </ul>
 
 </div>
 </div>

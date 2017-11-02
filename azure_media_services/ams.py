@@ -9,14 +9,20 @@ Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.
 
 import logging
 
+from django.conf import settings
+
 from xblock.core import List, Scope, String, XBlock
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
+from .media_services_management_client import MediaServicesManagementClient
+from .models import SettingsAzureOrganization
 from .utils import _
 
+
 log = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 # According to edx-platform vertical xblocks
 CLASS_PRIORITY = ['video']
@@ -27,6 +33,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     """
     The xBlock to play videos from Azure Media Services.
     """
+
+    RESOURCE = 'https://rest.media.azure.net'
 
     display_name = String(
         display_name=_("Display Name"),
@@ -100,6 +108,40 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         'token_issuer', 'token_scope', 'captions', 'transcript_url', 'download_url',
     )
 
+    def studio_view(self, context):
+        """
+        Render a form for editing this XBlock.
+        """
+        settings_azure = self.get_settings_azure()
+        list_locators = []
+
+        if settings_azure:
+            media_services = self.get_media_services(settings_azure)
+            list_locators = media_services.get_list_locators()
+
+        context = {
+            'fields': [],
+            'is_settings_azure': settings_azure is not None,
+            'list_locators': list_locators
+        }
+        fragment = Fragment()
+        # Build a list of all the fields that can be edited:
+        for field_name in self.editable_fields:
+            field = self.fields[field_name]
+            assert field.scope in (Scope.content, Scope.settings), (
+                "Only Scope.content or Scope.settings fields can be used with "
+                "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
+                "not generally created/configured by content authors in Studio."
+            )
+            field_info = self._make_field_info(field_name, field)
+            if field_info is not None:
+                context["fields"].append(field_info)
+        fragment.content = loader.render_django_template('templates/studio_edit.html', context)
+        fragment.add_css(loader.load_unicode('public/css/studio.css'))
+        fragment.add_javascript(loader.load_unicode('static/js/studio_edit.js'))
+        fragment.initialize_js('StudioEditableXBlockMixin')
+        return fragment
+
     def _get_context_for_template(self):
         """
         Add parameters for the student view.
@@ -131,9 +173,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         """
         fragment = Fragment()
-        loader = ResourceLoader(__name__)
         context.update(self._get_context_for_template())
-        fragment.add_content(loader.render_mako_template('/templates/player.html', context))
+        fragment.add_content(loader.render_django_template('/templates/player.html', context))
 
         '''
         Note: DO NOT USE the "latest" folder in production, but specify a version
@@ -183,3 +224,30 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         self.runtime.publish(self, event_type, data)
         return {'result': 'success'}
+
+    def get_settings_azure(self):
+        parameters = None
+        settings_azure = SettingsAzureOrganization.objects.filter(organization__short_name=self.location.org).first()
+        if settings_azure:
+            parameters = {
+                'client_id': settings_azure.client_id,
+                'secret': settings_azure.client_secret,
+                'tenant': settings_azure.tenant,
+                'resource': self.RESOURCE,
+                'rest_api_endpoint': settings_azure.rest_api_endpoint
+            }
+        elif (settings.FEATURES.get('AZURE_CLIENT_ID') and
+              settings.FEATURES.get('AZURE_CLIENT_SECRET') and
+              settings.FEATURES.get('AZURE_TENANT') and
+              settings.FEATURES.get('AZURE_REST_API_ENDPOINT')):
+            parameters = {
+                'client_id': settings.FEATURES.get('AZURE_CLIENT_ID'),
+                'secret': settings.FEATURES.get('AZURE_CLIENT_SECRET'),
+                'tenant': settings.FEATURES.get('AZURE_TENANT'),
+                'resource': self.RESOURCE,
+                'rest_api_endpoint': settings.FEATURES.get('AZURE_REST_API_ENDPOINT')
+            }
+        return parameters
+
+    def get_media_services(self, settings_azure):
+        return MediaServicesManagementClient(settings_azure)
