@@ -187,9 +187,140 @@ body .wrapper .edit-xblock-modal .modal-content {
     height: auto !important;
     overflow-y: hidden !important;
 }
+
 body .wrapper .xblock-ams .tabs-wrapper {
     padding-top: 0;
     position: relative;
     height: 450px;
     overflow-y: auto;
+}
+
+.xblock-ams .hidden {
+    display: none;
+}
+
+body .xblock-ams .tabs-wrapper .wrapper-comp-settings {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+body .xblock-ams .wrapper-comp-settings .list-input.settings-list {
+    width: 100%;
+}
+
+body .xblock-ams .left-side, body .xblock-ams .right-side {
+    flex: 0 0 50%;
+    padding: 20px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    max-width: 50%;
+}
+
+body .xblock-ams .left-side {
+    border-right: 1px solid #e5e5e5;
+}
+
+body .xblock-ams .component-tab {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+body .xblock-ams .left-side ul, .right-side ul {
+    margin-top: 15px;
+}
+
+body .xblock-ams .left-side ul li, .right-side ul li {
+    margin-bottom: 7px;
+}
+
+body .xblock-ams .some-message {
+    padding: 20px;
+    box-sizing: border-box;
+    background: #99c9e4;
+    margin: 10px;
+    border-radius: 12px;
+}
+
+body .xblock-ams .left-side ul label, .right-side ul label {
+    margin: 0 5px;
+    word-break: break-all;
+}
+
+body .xblock-ams .left-side ul label {
+    display: inline-block;
+}
+
+body .xblock-ams .left-side ul input {
+    vertical-align: top;
+}
+
+body .xblock-ams .loader-holder {
+    height: 100%;
+}
+
+body .xblock-ams .loader-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+body .xblock-ams .loader {
+    animation: rotate 3s infinite;
+}
+
+body .xblock-ams .loader svg {
+    height: 20px;
+    width: 20px;
+}
+
+body .xblock-ams .select-holder {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+}
+
+body .xblock-ams .wrap-input-captions,
+body .xblock-ams .loader-holder select {
+    flex: 1 1 50%;
+}
+
+@media screen and (max-width: 1200px) {
+    body .xblock-ams .loader-holder select {
+        max-width: 30%;
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0);
+    }
+    50% {
+        transform: rotate(180deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+
+}
+
+.section-header {
+    font-weight: 400;
+    font-size: large;
+}
+
+.ams-info {
+    font-style: italic;
+    font-weight: 300;
+}
+
+.media-file-name {
+    font-weight: bold;
+}
+
+.media-source {
+    font-weight: 100;
 }

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Copyright (c) Microsoft Corporation. All Rights Reserved.
 
@@ -6,19 +7,26 @@ Licensed under the MIT license. See LICENSE file on the project webpage for deta
 XBlock to allow for video playback from Azure Media Services
 Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.html
 """
-
 import logging
 
-from django.conf import settings
-
+from edxval.models import Video
+from openedx.core.djangoapps.lang_pref.api import all_languages
+import requests
 from xblock.core import List, Scope, String, XBlock
+from xblock.fields import Boolean
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
-from .media_services_management_client import MediaServicesManagementClient
-from .models import SettingsAzureOrganization
 from .utils import _
+
+APP_AZURE_VIDEO_PIPLINE = True
+
+try:
+    from azure_video_pipeline.media_service import LocatorTypes
+    from azure_video_pipeline.utils import get_azure_config, get_media_service_client
+except ImportError:
+    APP_AZURE_VIDEO_PIPLINE = False
 
 
 log = logging.getLogger(__name__)
@@ -91,9 +99,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         help=_("A list of caption definitions"),
         scope=Scope.settings
     )
-    transcript_url = String(
-        display_name=_("Transcript URL"),
-        help=_("A transcript URL"),
+    transcripts_enabled = Boolean(
+        display_name=_("Transcripts enabled"),
+        help=_("Transcripts switch"),
+        default=False,
         scope=Scope.settings
     )
     download_url = String(
@@ -105,24 +114,22 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     # These are what become visible in the Mixin editor
     editable_fields = (
         'display_name', 'video_url', 'verification_key', 'protection_type',
-        'token_issuer', 'token_scope', 'captions', 'transcript_url', 'download_url',
+        'token_issuer', 'token_scope', 'captions', 'transcripts_enabled', 'download_url',
     )
 
     def studio_view(self, context):
         """
         Render a form for editing this XBlock.
         """
-        settings_azure = self.get_settings_azure()
-        list_locators = []
+        azure_config = get_azure_config(self.location.org) if APP_AZURE_VIDEO_PIPLINE else {}
+        list_stream_videos = []
 
-        if settings_azure:
-            media_services = self.get_media_services(settings_azure)
-            list_locators = media_services.get_list_locators()
-
+        if azure_config:
+            list_stream_videos = self.get_list_stream_videos()
         context = {
             'fields': [],
-            'is_settings_azure': settings_azure is not None,
-            'list_locators': list_locators
+            'has_azure_config': len(azure_config) != 0,
+            'list_stream_videos': list_stream_videos,
         }
         fragment = Fragment()
         # Build a list of all the fields that can be edited:
@@ -150,7 +157,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "video_url": self.video_url,
             "protection_type": self.protection_type,
             "captions": self.captions,
-            "transcript_url": self.transcript_url,
+            "transcripts_enabled": self.transcripts_enabled,
             "download_url": self.download_url,
         }
 
@@ -212,12 +219,104 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 new_class = higher_class
         return new_class
 
+    def get_list_stream_videos(self):
+        return Video.objects.filter(
+            courses__course_id=self.location.course_key,
+            courses__is_hidden=False,
+            status="file_complete"
+        ).order_by('-created', 'edx_video_id')
+
+    def get_video_info(self, video, path_locator_on_demand, path_locator_sas, asset_files):
+        download_video_url = ''
+
+        if path_locator_sas:
+            file_size = 0
+            for asset_file in asset_files:
+                try:
+                    content_file_size = int(asset_file.get('ContentFileSize', 0))
+                except ValueError:
+                    content_file_size = 0
+
+                if asset_file.get('Name', '').endswith('.mp4') and content_file_size > file_size:
+                    name_file = asset_file['Name']
+                    file_size = content_file_size
+                    download_video_url = u'/{}?'.format(name_file).join(path_locator_sas.split('?'))
+
+        return {
+            'smooth_streaming_url': u'{}{}/manifest'.format(
+                path_locator_on_demand, video.client_video_id.replace('mp4', 'ism')
+            ) if path_locator_on_demand else '',
+            'download_video_url': download_video_url,
+        }
+
+    def get_captions_info(self, video, path_locator_sas):
+        data = []
+        if path_locator_sas:
+            for subtitle in video.subtitles.all():
+                data.append({
+                    'download_url': '/{}?'.format(subtitle.content).join(path_locator_sas.split('?')),
+                    'file_name': subtitle.content,
+                    'language': subtitle.language,
+                    'language_title': dict(all_languages()).get(subtitle.language)
+                })
+
+        return data
+
+    def drop_http_or_https(self, url):
+        """
+        In order to avoid mixing HTTP/HTTPS which can cause some warnings to appear in some browsers.
+        """
+        return url.replace("https:", "").replace("http:", "")
+
+    # Xblock handlers:
+    @XBlock.json_handler
+    def get_captions_and_video_info(self, data, suffix=''):
+        edx_video_id = data.get('edx_video_id')
+
+        try:
+            video = Video.objects.get(edx_video_id=edx_video_id)
+        except Video.DoesNotExist:
+            asset = None
+        else:
+            media_service = get_media_service_client(self.location.org)
+            asset = media_service.get_input_asset_by_video_id(edx_video_id, 'ENCODED')
+
+        error_message = _("Target Video is no longer available on Azure or is corrupted in some way.")
+        captions = []
+        video_info = {}
+        asset_files = None
+
+        if asset:
+            locator_on_demand = media_service.get_asset_locator(asset['Id'], LocatorTypes.OnDemandOrigin)
+            locator_sas = media_service.get_asset_locator(asset['Id'], LocatorTypes.SAS)
+
+            if locator_on_demand:
+                error_message = ''
+                path_locator_on_demand = self.drop_http_or_https(locator_on_demand.get('Path'))
+                path_locator_sas = None
+
+                if locator_sas:
+                    path_locator_sas = self.drop_http_or_https(locator_sas.get('Path'))
+                    captions = self.get_captions_info(video, path_locator_sas)
+                    asset_files = media_service.get_asset_files(asset['Id'])
+                else:
+                    error_message = _("To be able to use captions/transcripts auto-fetching, "
+                                      "AMS Asset should be published properly "
+                                      "(in addition to 'streaming' locator a 'progressive' "
+                                      "locator must be created as well).")
+
+                video_info = self.get_video_info(video, path_locator_on_demand, path_locator_sas, asset_files)
+
+        return {'error_message': error_message,
+                'video_info': video_info,
+                'captions': captions}
+
     @XBlock.json_handler
     def publish_event(self, data, suffix=''):
         try:
             event_type = data.pop('event_type')
         except KeyError:
-            return {'result': 'error', 'message': 'Missing event_type in JSON data'}
+            return {'result': 'error', 'message': _('Missing event_type in JSON data')}
 
         data['video_url'] = self.video_url
         data['user_id'] = self.scope_ids.user_id
@@ -225,29 +324,35 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         self.runtime.publish(self, event_type, data)
         return {'result': 'success'}
 
-    def get_settings_azure(self):
-        parameters = None
-        settings_azure = SettingsAzureOrganization.objects.filter(organization__short_name=self.location.org).first()
-        if settings_azure:
-            parameters = {
-                'client_id': settings_azure.client_id,
-                'secret': settings_azure.client_secret,
-                'tenant': settings_azure.tenant,
-                'resource': self.RESOURCE,
-                'rest_api_endpoint': settings_azure.rest_api_endpoint
-            }
-        elif (settings.FEATURES.get('AZURE_CLIENT_ID') and
-              settings.FEATURES.get('AZURE_CLIENT_SECRET') and
-              settings.FEATURES.get('AZURE_TENANT') and
-              settings.FEATURES.get('AZURE_REST_API_ENDPOINT')):
-            parameters = {
-                'client_id': settings.FEATURES.get('AZURE_CLIENT_ID'),
-                'secret': settings.FEATURES.get('AZURE_CLIENT_SECRET'),
-                'tenant': settings.FEATURES.get('AZURE_TENANT'),
-                'resource': self.RESOURCE,
-                'rest_api_endpoint': settings.FEATURES.get('AZURE_REST_API_ENDPOINT')
-            }
-        return parameters
+    @XBlock.json_handler
+    def fetch_transcript(self, data, _suffix=''):
+        """
+        Xblock handler to perform actual transcript content fetching.
 
-    def get_media_services(self, settings_azure):
-        return MediaServicesManagementClient(settings_azure)
+        :param data: transcript language code and transcript URL
+        :param _suffix: not using
+        :return: transcript's text content
+        """
+        handler_response = {'result': 'error', 'message': _('Missing required transcript data: `src` and `srcLang`')}
+
+        try:
+            transcript_url = data.pop('srcUrl')
+            transcript_lang = data.pop('srcLang')
+        except KeyError:
+            return handler_response
+
+        failure_message = "Transcript fetching failure: language [{}]".format(transcript_lang)
+        try:
+            response = requests.get(transcript_url)
+            return {
+                'result': 'success',
+                'content': response.content
+            }
+        except IOError:
+            log.exception(failure_message)
+            handler_response['message'] = _(failure_message)
+            return handler_response
+        except (ValueError, KeyError, TypeError, AttributeError):
+            log.exception("Can't get content of the fetched transcript: language [{}]".format(transcript_lang))
+            handler_response['message'] = _(failure_message)
+            return handler_response

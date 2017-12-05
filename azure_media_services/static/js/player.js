@@ -1,7 +1,46 @@
 // Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
-/* global WebVTT _ amp */
+/* global WebVTT _ amp gettext runtime */
+
+
+var events = {
+    played: 'edx.video.played',
+    paused: 'edx.video.paused',
+    stopped: 'edx.video.stopped',
+    positionChanged: 'edx.video.position.changed',
+    transcriptShown: 'edx.video.transcript.show',
+    transcriptsHidden: 'edx.video.transcript.hidden',
+    videoLoaded: 'edx.video.loaded',
+    captionsShown: 'edx.video.closed_captions.shown',
+    captionsHidden: 'edx.video.closed_captions.hidden'
+};
+
+
+/**
+ * Build actual URI based on current page protocol context.
+ * @param src: source URI part w/o leading protocol
+ */
+function buildUrl(src) {
+    'use strict';
+    return window.location.protocol + src;
+}
+
+
+/**
+ * xBlock handler (frontend part).
+ * @param handlerUrl
+ * @param data
+ */
+function handleData(handlerUrl, data) {
+    'use strict';
+    return $.ajax({
+        type: 'POST',
+        url: handlerUrl,
+        dataType: 'json',
+        data: JSON.stringify(data)
+    });
+}
 
 
 /**
@@ -68,7 +107,6 @@ function syncTimer(player, transcriptCues, $transcriptElement) {
     }
 }
 
-
 /**
  * Transcripts creating.
  * @param player
@@ -85,6 +123,8 @@ function initTranscript(player, transcript, $transcriptElement) {
     var regions = [];
     var startTime;
     var $transcriptItems;
+
+    $transcriptElement.empty();
 
     parser.oncue = function(cue) { // eslint-disable-line no-shadow
         cues.push(cue);
@@ -167,11 +207,9 @@ function AzureMediaServicesBlock(runtime, container) {
 
         var subtitleEls;
         var languageName;
-        var eventType;
         var eventPostUrl;
+        var fetchTranscriptUrl;
         var timeHandler;
-        var $target;
-        var xhr;
 
         // Fyi, container contains all of player.html so it is an ancestor of $vidAndTranscript
         //      $vidAndTranscript is an ancestor of BOTH $vidParent AND $transcriptElement
@@ -187,13 +225,14 @@ function AzureMediaServicesBlock(runtime, container) {
 
         // Add event handlers
         eventPostUrl = runtime.handlerUrl(container, 'publish_event');
+        fetchTranscriptUrl = runtime.handlerUrl(container, 'fetch_transcript');
 
         // This will be updated as the video plays.
         timeHandler = null;
 
         this.addEventListener(amp.eventName.pause,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, 'edx.video.paused', {});
+                sendPlayerEvent(eventPostUrl, events.paused, {});
 
                 if (timeHandler !== null) {
                     clearInterval(timeHandler);
@@ -203,7 +242,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
         this.addEventListener(amp.eventName.play,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, 'edx.video.played', {});
+                sendPlayerEvent(eventPostUrl, events.played, {});
 
                 timeHandler = setInterval(
                     function() {
@@ -215,53 +254,68 @@ function AzureMediaServicesBlock(runtime, container) {
         );
 
         this.addEventListener(amp.eventName.loadeddata,
-            function(evt) { // eslint-disable-line no-unused-vars
+            function() { // eslint-disable-line no-unused-vars
                 var $transcriptButton;
-                var keycode;
+                var $transcriptButtonMenu;
+                var reportEvent;
                 if ($transcriptElement.length) {
                     // Find and re-position button markup. This must be done
                     // after AMP initializes built-in player controls.
                     $transcriptButton = $transcriptElement.find('.toggleTranscript').first();
                     $vidParent.find('.amp-controlbaricons-right').first().append($transcriptButton);
 
-                    // Enable button action.
-                    $transcriptButton.on('click keydown', (function(evt) { // eslint-disable-line no-shadow
-                        keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which);
-                        if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
-                            return;
-                        }
-                        if (keycode === 32) {
-                            evt.preventDefault();
-                        }
-
-                        // Toggle transcript view.
-                        eventType = '';
-                        if ($vidAndTranscript.hasClass('closed')) {
-                            eventType = 'edx.video.transcript.show';
-                            $vidAndTranscript.removeClass('closed');
-                        } else {
-                            eventType = 'edx.video.transcript.hidden';
-                            $vidAndTranscript.addClass('closed');
-                        }
-
-                        // Log toggle transcript event.
-                        sendPlayerEvent(eventPostUrl, eventType, {});
+                    $transcriptButtonMenu = $transcriptButton.find('.vjs-menu').first();
+                    $transcriptButtonMenu.css({right: '0px', left: 'inherit'});
+                    $transcriptButton.on('mouseenter mouseleave', (function() {
+                        $transcriptButtonMenu.toggle();
                     }));
-                }
 
-                sendPlayerEvent(eventPostUrl, 'edx.video.loaded', {});
+                    $transcriptButtonMenu.on('click', function(evt) {
+                        var $target = $(evt.target);
+                        $transcriptButtonMenu.find('.vjs-menu-item')
+                            .removeClass('vjs-selected')
+                            .attr('aria-selected', false);
+                        $target
+                            .addClass('vjs-selected')
+                            .attr('aria-selected', true);
+
+                        if ($.trim($target.html()) === 'Off') {
+                            $vidAndTranscript.addClass('closed');
+                            reportEvent = events.transcriptsHidden;
+                        } else {
+                            if ($transcriptElement.length) {
+                                handleData(fetchTranscriptUrl, {
+                                    srcUrl: buildUrl($target.data('src')),
+                                    srcLang: $target.data('srclang')
+                                }).success(function(responseData) {
+                                    if (responseData.result === 'error') {
+                                        $transcriptElement.text(responseData.message);
+                                    } else {
+                                        transcriptCues = initTranscript(
+                                            self, responseData.content, $transcriptElement
+                                        );
+                                    }
+                                });
+                            }
+                            $vidAndTranscript.removeClass('closed');
+                            reportEvent = events.transcriptShown;
+                        }
+                        sendPlayerEvent(eventPostUrl, reportEvent, {});
+                    });
+                }
+                sendPlayerEvent(eventPostUrl, events.videoLoaded, {});
             }
         );
 
         this.addEventListener(amp.eventName.seeked,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, 'edx.video.position.changed', {});
+                sendPlayerEvent(eventPostUrl, events.positionChanged, {});
             }
         );
 
         this.addEventListener(amp.eventName.ended,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, 'edx.video.stopped', {});
+                sendPlayerEvent(eventPostUrl, events.stopped, {});
 
                 if (timeHandler !== null) {
                     clearInterval(timeHandler);
@@ -269,34 +323,20 @@ function AzureMediaServicesBlock(runtime, container) {
             }
         );
 
-        // Ajax request for transcript file.
-        if ($transcriptElement.length) {
-            xhr = new XMLHttpRequest();
-            xhr.open('GET', $transcriptElement.data('transcript-url'));
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    // Parse transcript.
-                    transcriptCues = initTranscript(self, xhr.responseText, $transcriptElement);
-                }
-            };
-            xhr.send();
-        }
-
         // Log when closed captions (subtitles) are toggled.
         // NOTE we use classes from Azure Media Player which may change.
         subtitleEls = $(container).find('.vjs-subtitles-button .vjs-menu-item');
 
         subtitleEls.mousedown(function(evt) {
+            var reportEvent = events.captionsShown;
             // TODO: we should attach to a different event. For example, this can also be toggled via keyboard.
-            $target = $(evt.target);
-            languageName = $target.html();
-            eventType = 'edx.video.closed_captions.shown';
+            languageName = $(evt.target).html();
             if (languageName === 'Off') {
-                eventType = 'edx.video.closed_captions.hidden';
+                reportEvent = events.captionsHidden;
                 languageName = '';
             }
 
-            sendPlayerEvent(eventPostUrl, eventType, {language_name: languageName});
+            sendPlayerEvent(eventPostUrl, reportEvent, {language_name: languageName});
         });
     });
 }
