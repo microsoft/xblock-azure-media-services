@@ -1,39 +1,40 @@
-# Copyright (c) Microsoft Corporation. All Rights Reserved.
-# Licensed under the MIT license. See LICENSE file on the project webpage for details.
-
 """
-XBlock to allow for video playback from Azure Media Services
+Copyright (c) Microsoft Corporation. All Rights Reserved.
 
+Licensed under the MIT license. See LICENSE file on the project webpage for details.
+
+XBlock to allow for video playback from Azure Media Services
 Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.html
 """
 
 import logging
-import jwt
-import base64
-import time
 
-from uuid import uuid4
+from django.conf import settings
 
-from .utils import _
-
-from xblock.core import String, Scope, List, XBlock
-from xblock.fields import Boolean, Float, Integer, Dict
+from xblock.core import List, Scope, String, XBlock
 from xblock.fragment import Fragment
-from xblock.validation import ValidationMessage
-
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
+from .media_services_management_client import MediaServicesManagementClient
+from .models import SettingsAzureOrganization
+from .utils import _
+
+
 log = logging.getLogger(__name__)
+loader = ResourceLoader(__name__)
 
 # According to edx-platform vertical xblocks
 CLASS_PRIORITY = ['video']
 
+
 @XBlock.needs('i18n')
 class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     """
-    The xBlock to play videos from Azure Media Services
+    The xBlock to play videos from Azure Media Services.
     """
+
+    RESOURCE = 'https://rest.media.azure.net'
 
     display_name = String(
         display_name=_("Display Name"),
@@ -77,7 +78,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default="http://openedx.microsoft.com/",
         scope=Scope.settings
     )
-    token_scope= String(
+    token_scope = String(
         display_name=_("Token Scope"),
         help=_(
             "This value must match what is in the 'Content Protection' area of the Azure Media Services portal"
@@ -107,39 +108,73 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         'token_issuer', 'token_scope', 'captions', 'transcript_url', 'download_url',
     )
 
+    def studio_view(self, context):
+        """
+        Render a form for editing this XBlock.
+        """
+        settings_azure = self.get_settings_azure()
+        list_locators = []
+
+        if settings_azure:
+            media_services = self.get_media_services(settings_azure)
+            list_locators = media_services.get_list_locators()
+
+        context = {
+            'fields': [],
+            'is_settings_azure': settings_azure is not None,
+            'list_locators': list_locators
+        }
+        fragment = Fragment()
+        # Build a list of all the fields that can be edited:
+        for field_name in self.editable_fields:
+            field = self.fields[field_name]
+            assert field.scope in (Scope.content, Scope.settings), (
+                "Only Scope.content or Scope.settings fields can be used with "
+                "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
+                "not generally created/configured by content authors in Studio."
+            )
+            field_info = self._make_field_info(field_name, field)
+            if field_info is not None:
+                context["fields"].append(field_info)
+        fragment.content = loader.render_django_template('templates/studio_edit.html', context)
+        fragment.add_css(loader.load_unicode('public/css/studio.css'))
+        fragment.add_javascript(loader.load_unicode('static/js/studio_edit.js'))
+        fragment.initialize_js('StudioEditableXBlockMixin')
+        return fragment
+
     def _get_context_for_template(self):
         """
-        Add parameters for the student view
+        Add parameters for the student view.
         """
         context = {
             "video_url": self.video_url,
             "protection_type": self.protection_type,
             "captions": self.captions,
             "transcript_url": self.transcript_url,
-            "download_url": self.download_url,			
+            "download_url": self.download_url,
         }
 
         if self.protection_type:
-    	    context.update({
-	    	    "auth_token": self.verification_key,
-	        })
+            context.update({
+                "auth_token": self.verification_key,
+            })
 
         return context
 
     def student_view(self, context):
         """
-        XBlock student view of this component.
+        Student view of this component.
 
         Arguments:
             context (dict): XBlock context
 
         Returns:
             xblock.fragment.Fragment: XBlock HTML fragment
+
         """
         fragment = Fragment()
-        loader = ResourceLoader(__name__)
         context.update(self._get_context_for_template())
-        fragment.add_content(loader.render_mako_template('/templates/player.html', context))
+        fragment.add_content(loader.render_django_template('/templates/player.html', context))
 
         '''
         Note: DO NOT USE the "latest" folder in production, but specify a version
@@ -164,11 +199,11 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         fragment.initialize_js('AzureMediaServicesBlock')
         return fragment
-    
+
     # xblock runtime navigation tab video image
     def get_icon_class(self):
         """
-        Returns the highest priority icon class.
+        Return the highest priority icon class.
         """
         child_classes = set(child.get_icon_class() for child in self.get_children())
         new_class = 'video'
@@ -176,16 +211,43 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             if higher_class in child_classes:
                 new_class = higher_class
         return new_class
-    
+
     @XBlock.json_handler
     def publish_event(self, data, suffix=''):
         try:
             event_type = data.pop('event_type')
-        except KeyError as e:
+        except KeyError:
             return {'result': 'error', 'message': 'Missing event_type in JSON data'}
 
         data['video_url'] = self.video_url
         data['user_id'] = self.scope_ids.user_id
 
         self.runtime.publish(self, event_type, data)
-        return {'result':'success'}
+        return {'result': 'success'}
+
+    def get_settings_azure(self):
+        parameters = None
+        settings_azure = SettingsAzureOrganization.objects.filter(organization__short_name=self.location.org).first()
+        if settings_azure:
+            parameters = {
+                'client_id': settings_azure.client_id,
+                'secret': settings_azure.client_secret,
+                'tenant': settings_azure.tenant,
+                'resource': self.RESOURCE,
+                'rest_api_endpoint': settings_azure.rest_api_endpoint
+            }
+        elif (settings.FEATURES.get('AZURE_CLIENT_ID') and
+              settings.FEATURES.get('AZURE_CLIENT_SECRET') and
+              settings.FEATURES.get('AZURE_TENANT') and
+              settings.FEATURES.get('AZURE_REST_API_ENDPOINT')):
+            parameters = {
+                'client_id': settings.FEATURES.get('AZURE_CLIENT_ID'),
+                'secret': settings.FEATURES.get('AZURE_CLIENT_SECRET'),
+                'tenant': settings.FEATURES.get('AZURE_TENANT'),
+                'resource': self.RESOURCE,
+                'rest_api_endpoint': settings.FEATURES.get('AZURE_REST_API_ENDPOINT')
+            }
+        return parameters
+
+    def get_media_services(self, settings_azure):
+        return MediaServicesManagementClient(settings_azure)
