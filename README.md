@@ -66,19 +66,7 @@ Click the `Edit` button in the upper right corner to expose the scrollable setti
 
 ![Settings3](docs/img/settings3.png)
 
-The simplest way to configure Video URL lays within `MANAGEMENT` tab.
-
-![Management tab](docs/img/management-tab.png)
-
-All is needed is to open `MANAGEMENT` tab and pick the video file from the list of available ones on the left panel.
-
-![Management: available videos](docs/img/management-tab-videos-list.png)
-
-As soon as the video is selected the list of available transcripts (captions) appears on the right panel. Initially, all transcripts are unchecked. To enable certain transcript its checkbox should be checked.
-
-![Management: available videos](docs/img/management-tab-transcripts-list.png)
-
-Also, Video URL field may be configured manually (please, see below).
+Video URL field may be configured manually (please, see below).
 
 The following is a description of the fields and how to configure them. At a minimum, the courseware author will need to fill in the Video Url to match what Azure Media Services portal says the Publish URL is, for example (old Azure dashboard):
 
@@ -151,8 +139,6 @@ This version of the Azure Media Services xBlock supports several means to associ
 **_Subtitles/Captions_**: These are short pieces of text which are rendered in the lowest center portion of the video player, in a manner similar to captions on a television. The Azure Media Player supports subtitles and captions out of the box, and the Azure Media Services xBlock merely wires through the existing support.
 
 While subtitles/captions are rendered in the same manner, they are typically targeted to different audiences. Subtitles are typically for translations between languages, but captions are for users who have accessibility needs.
-
-If Video URL field was configured via `MANAGEMENT` tab `Captions` field should be already filled.
 
 To use subtitles/captions, simply fill in the `Captions` field inside the xBlock settings panel. Right now the UI is a text field in which the content editor will have to input in a JSON formatted array of dictionaries. This will change into a more user-friendly UI in a subsequent version of the xBlock:
 
@@ -232,4 +218,24 @@ speed_change_video
 edx.video.language_menu.hidden
 edx.video.language_menu.shown
 ```
+Automaitc way to configure Video URL
+------------------------------------
+Before use this way, please be sure that you configure the following settings https://github.com/raccoongang/edx-platform/blob/oxa/video/cms/djangoapps/azure_video_pipeline/README.md
 
+The simplest way to configure Video URL lays within `MANAGEMENT` tab.
+
+![Management tab](docs/img/management-tab.png)
+
+All is needed is to open `MANAGEMENT` tab and pick the video file from the list of available ones on the left panel.
+
+![Management: available videos](docs/img/management-tab-videos-list.png)
+
+As soon as the video is selected the list of available transcripts (captions) appears on the right panel. Initially, all transcripts are unchecked. To enable certain transcript its checkbox should be checked.
+
+![Management: available videos](docs/img/management-tab-transcripts-list.png)
+
+
+Working with Transcripts/Subtitles/Captions
+-------------------------------------------
+If Video URL field was configured via `MANAGEMENT` tab `Captions` field should be already filled.
+To enable transcripts player control in the Azure Media Services xBlock, turn on the boolean `Transcripts enabled` field:
