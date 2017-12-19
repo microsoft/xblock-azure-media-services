@@ -182,15 +182,7 @@ Transcripts are very similar to captions/subtitles, but it is designed more for 
 
 Transcript features are part of Open edX and the implementation in the Azure Media Services xBlocks is meant to be a “feature parity” compared to the out-of-the-box video player support in Open edX.
 
-To enable transcripts player control in the Azure Media Services xBlock, turn on the boolean `Transcripts enabled` field:
 
-![Transcript Setting](docs/img/transcripts-switch.png)
-
-If transcripts feature is enabled new `TRANSCRIPTS` control  and transcripts download links appear in the Player.
-
-![Transcript Setting](docs/img/transcritps-controls.png)
-
-If configured correctly, the entire WebVTT file will be read and presented in the scrolling region to the right of the video player. When the video plays, you will notice that the current text associated with the video track will be highlighted. The viewer can click on any piece of the transcript text and the video player will seek to the time associated to that portion of the clicked transcript.
 
 Analytic Events
 ---------------
@@ -239,3 +231,12 @@ Working with Transcripts/Subtitles/Captions
 -------------------------------------------
 If Video URL field was configured via `MANAGEMENT` tab `Captions` field should be already filled.
 To enable transcripts player control in the Azure Media Services xBlock, turn on the boolean `Transcripts enabled` field:
+
+
+![Transcript Setting](docs/img/transcripts-switch.png)
+
+If transcripts feature is enabled new `TRANSCRIPTS` control  and transcripts download links appear in the Player.
+
+![Transcript Setting](docs/img/transcritps-controls.png)
+
+If configured correctly, the entire WebVTT file will be read and presented in the scrolling region to the right of the video player. When the video plays, you will notice that the current text associated with the video track will be highlighted. The viewer can click on any piece of the transcript text and the video player will seek to the time associated to that portion of the clicked transcript.
