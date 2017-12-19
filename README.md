@@ -210,7 +210,9 @@ speed_change_video
 edx.video.language_menu.hidden
 edx.video.language_menu.shown
 ```
-Automaitc way to configure Video URL
+
+
+Automatic way to configure Video URL
 ------------------------------------
 Before use this way, please be sure that you configure the following settings https://github.com/raccoongang/edx-platform/blob/oxa/video/cms/djangoapps/azure_video_pipeline/README.md
 
