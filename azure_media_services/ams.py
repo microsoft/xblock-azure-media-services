@@ -9,6 +9,7 @@ Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.
 """
 import logging
 
+from django.core.exceptions import ImproperlyConfigured
 from edxval.models import Video
 from openedx.core.djangoapps.lang_pref.api import all_languages
 import requests
@@ -121,7 +122,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Render a form for editing this XBlock.
         """
-        azure_config = get_azure_config(self.location.org) if APP_AZURE_VIDEO_PIPLINE else {}
+        try:
+            azure_config = get_azure_config(self.location.org) if APP_AZURE_VIDEO_PIPLINE else {}
+        except ImproperlyConfigured:
+            azure_config = {}
         list_stream_videos = []
 
         if azure_config:
@@ -223,7 +227,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         return Video.objects.filter(
             courses__course_id=self.location.course_key,
             courses__is_hidden=False,
-            status="file_complete"
+            status__in=["file_complete", "file_encrypted"]
         ).order_by('-created', 'edx_video_id')
 
     def get_video_info(self, video, path_locator_on_demand, path_locator_sas, asset_files):
@@ -287,8 +291,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         asset_files = None
 
         if asset:
-            locator_on_demand = media_service.get_asset_locator(asset['Id'], LocatorTypes.OnDemandOrigin)
-            locator_sas = media_service.get_asset_locator(asset['Id'], LocatorTypes.SAS)
+            locator_on_demand = media_service.get_asset_locators(asset['Id'], LocatorTypes.OnDemandOrigin)
+            locator_sas = media_service.get_asset_locators(asset['Id'], LocatorTypes.SAS)
 
             if locator_on_demand:
                 error_message = ''

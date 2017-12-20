@@ -67,7 +67,7 @@ class AMSXBlockTests(unittest.TestCase):
         video_filter.assert_called_once_with(
             courses__course_id='course_key',
             courses__is_hidden=False,
-            status="file_complete"
+            status__in=['file_complete', 'file_encrypted']
         )
         video_filter().order_by.assert_called_once_with('-created', 'edx_video_id')
         self.assertEqual(list_stream_videos, ['video1', 'video2'])
@@ -223,7 +223,7 @@ class AMSXBlockTests(unittest.TestCase):
     ])
     @mock.patch('azure_media_services.ams.get_media_service_client', return_value=mock.Mock(
         get_input_asset_by_video_id=mock.Mock(return_value={'Id': 'asset_id'}),
-        get_asset_locator=mock.Mock(side_effect=({'Path': 'path_locator_on_demand'}, {'Path': 'path_locator_sas'})),
+        get_asset_locators=mock.Mock(side_effect=({'Path': 'path_locator_on_demand'}, {'Path': 'path_locator_sas'})),
         get_asset_files=mock.Mock(return_value=['asset_file_1', 'asset_file_2'])
     ))
     @mock.patch('azure_media_services.ams.Video.objects.get', return_value='video_object')
@@ -243,7 +243,7 @@ class AMSXBlockTests(unittest.TestCase):
         media_service_client = get_media_service_client()
         media_service_client.get_input_asset_by_video_id.assert_called_once_with('edx_video_id', 'ENCODED')
         self.assertEqual(
-            media_service_client.get_asset_locator.call_args_list,
+            media_service_client.get_asset_locators.call_args_list,
             [mock.call('asset_id', 'OnDemandOrigin'), mock.call('asset_id', 'SAS')]
         )
         get_captions_info.assert_called_once_with('video_object', 'path_locator_sas')
