@@ -75,7 +75,7 @@ class AMSXBlockTests(unittest.TestCase):
     def test_get_video_info(self):
         block = self.make_one()
 
-        video = mock.Mock(client_video_id='video_name.mp4')
+        video = mock.Mock(client_video_id='video_name.mp4', status='file_complete')
         path_locator_on_demand = '//ma.streaming.mediaservices.windows.net/locator_id/'
         path_locator_sas = '//sa.blob.core.windows.net/asset-locator_id?sv=2012-02-12&sr=c'
         asset_files = [
@@ -107,7 +107,7 @@ class AMSXBlockTests(unittest.TestCase):
 
     def test_get_video_info_if_path_locator_on_demand_is_not_defined(self):
         block = self.make_one()
-        video = mock.Mock(client_video_id='video_name.mp4')
+        video = mock.Mock(client_video_id='video_name.mp4', status='file_complete')
         path_locator_on_demand = ''
         path_locator_sas = '//sa.blob.core.windows.net/asset-locator_id?sv=2012-02-12&sr=c'
         asset_files = [

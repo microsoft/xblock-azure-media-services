@@ -161,7 +161,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "video_url": self.video_url,
             "protection_type": self.protection_type,
             "captions": self.captions,
-            "transcripts_enabled": self.transcripts_enabled,
+            "transcripts_enabled": self.transcripts_enabled and self.captions,
             "download_url": self.download_url,
         }
 
@@ -233,7 +233,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     def get_video_info(self, video, path_locator_on_demand, path_locator_sas, asset_files):
         download_video_url = ''
 
-        if path_locator_sas:
+        if path_locator_sas and video.status == 'file_complete':
             file_size = 0
             for asset_file in asset_files:
                 try:
