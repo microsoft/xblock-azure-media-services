@@ -72,133 +72,6 @@ class AMSXBlockTests(unittest.TestCase):
         video_filter().order_by.assert_called_once_with('-created', 'edx_video_id')
         self.assertEqual(list_stream_videos, ['video1', 'video2'])
 
-    def test_get_video_info(self):
-        block = self.make_one()
-
-        video = mock.Mock(client_video_id='video_name.mp4', status='file_complete')
-        path_locator_on_demand = '//ma.streaming.mediaservices.windows.net/locator_id/'
-        path_locator_sas = '//sa.blob.core.windows.net/asset-locator_id?sv=2012-02-12&sr=c'
-        asset_files = [
-            {
-                "Name": "fileNameIsm.ism",
-                "MimeType": "application/octet-stream",
-                "ContentFileSize": 10
-            },
-            {
-                "Name": "fileName_1.mp4",
-                "MimeType": "video/mp4",
-                "ContentFileSize": 10
-            },
-            {
-                "Name": "fileName_2.mp4",
-                "MimeType": "video/mp4",
-                "ContentFileSize": 20
-            }
-        ]
-
-        video_info = block.get_video_info(video, path_locator_on_demand, path_locator_sas, asset_files)
-
-        expected_video_info = {
-            'smooth_streaming_url': '//ma.streaming.mediaservices.windows.net/locator_id/video_name.ism/manifest',
-            'download_video_url': '//sa.blob.core.windows.net/asset-locator_id/fileName_2.mp4?sv=2012-02-12&sr=c'
-        }
-
-        self.assertEqual(video_info, expected_video_info)
-
-    def test_get_video_info_if_path_locator_on_demand_is_not_defined(self):
-        block = self.make_one()
-        video = mock.Mock(client_video_id='video_name.mp4', status='file_complete')
-        path_locator_on_demand = ''
-        path_locator_sas = '//sa.blob.core.windows.net/asset-locator_id?sv=2012-02-12&sr=c'
-        asset_files = [
-            {
-                "Name": "fileNameIsm.ism",
-                "MimeType": "application/octet-stream",
-                "ContentFileSize": 10
-            },
-            {
-                "Name": "fileName_1.mp4",
-                "MimeType": "video/mp4",
-                "ContentFileSize": 10
-            },
-            {
-                "Name": "fileName_2.mp4",
-                "MimeType": "video/mp4",
-                "ContentFileSize": 20
-            }
-        ]
-
-        video_info = block.get_video_info(video, path_locator_on_demand, path_locator_sas, asset_files)
-
-        expected_video_info = {
-            'smooth_streaming_url': '',
-            'download_video_url': '//sa.blob.core.windows.net/asset-locator_id/fileName_2.mp4?sv=2012-02-12&sr=c'
-        }
-
-        self.assertEqual(video_info, expected_video_info)
-
-    def test_get_video_info_if_path_locator_sas_is_not_defined(self):
-        block = self.make_one()
-
-        video = mock.Mock(client_video_id='video_name.mp4')
-        path_locator_on_demand = '//ma.streaming.mediaservices.windows.net/locator_id/'
-        path_locator_sas = ''
-        asset_files = [
-            {
-                "Name": "fileNameIsm.ism",
-                "MimeType": "application/octet-stream",
-                "ContentFileSize": 10
-            },
-            {
-                "Name": "fileName_1.mp4",
-                "MimeType": "video/mp4",
-                "ContentFileSize": 10
-            },
-            {
-                "Name": "fileName_2.mp4",
-                "MimeType": "video/mp4",
-                "ContentFileSize": 20
-            }
-        ]
-
-        video_info = block.get_video_info(video, path_locator_on_demand, path_locator_sas, asset_files)
-
-        expected_video_info = {
-            'smooth_streaming_url': '//ma.streaming.mediaservices.windows.net/locator_id/video_name.ism/manifest',
-            'download_video_url': ''
-        }
-
-        self.assertEqual(video_info, expected_video_info)
-
-    @mock.patch('azure_media_services.ams.all_languages', return_value=(('en', 'English'), ('fr', 'French')))
-    def test_get_captions_info(self, all_languages):
-        block = self.make_one()
-        path_locator_sas = '//sa.blob.core.windows.net/asset-locator_id?sv=2012-02-12&sr=c'
-        video = mock.Mock(subtitles=mock.Mock(all=mock.Mock(
-            return_value=[
-                mock.Mock(content='file_name_en.mp4', language='en'),
-                mock.Mock(content='file_name_fr.mp4', language='fr')
-            ]
-        )))
-
-        captions_info = block.get_captions_info(video, path_locator_sas)
-
-        expected_data = [
-            {
-                'download_url': '//sa.blob.core.windows.net/asset-locator_id/file_name_en.mp4?sv=2012-02-12&sr=c',
-                'file_name': 'file_name_en.mp4',
-                'language': 'en',
-                'language_title': 'English'
-            },
-            {
-                'download_url': '//sa.blob.core.windows.net/asset-locator_id/file_name_fr.mp4?sv=2012-02-12&sr=c',
-                'file_name': 'file_name_fr.mp4',
-                'language': 'fr',
-                'language_title': 'French'
-            }
-        ]
-        self.assertEqual(captions_info, expected_data)
-
     def test_drop_http_or_https(self):
         block = self.make_one()
 
@@ -209,11 +82,11 @@ class AMSXBlockTests(unittest.TestCase):
         self.assertEqual(url, '//ma.streaming.mediaservices.windows.net/locator_id/')
 
     @mock.patch('azure_media_services.ams.LocatorTypes')
-    @mock.patch('azure_media_services.ams.AMSXBlock.get_video_info', return_value={
+    @mock.patch('azure_media_services.ams.get_video_info', return_value={
         'smooth_streaming_url': 'smooth_streaming_url',
         'download_video_url': 'download_video_url'
     })
-    @mock.patch('azure_media_services.ams.AMSXBlock.get_captions_info', return_value=[
+    @mock.patch('azure_media_services.ams.get_captions_info', return_value=[
         {
             'download_url': 'download_url',
             'file_name': 'file_name_en.mp4',

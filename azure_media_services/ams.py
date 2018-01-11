@@ -11,7 +11,6 @@ import logging
 
 from django.core.exceptions import ImproperlyConfigured
 from edxval.models import Video
-from openedx.core.djangoapps.lang_pref.api import all_languages
 import requests
 from xblock.core import List, Scope, String, XBlock
 from xblock.fields import Boolean
@@ -25,7 +24,9 @@ APP_AZURE_VIDEO_PIPLINE = True
 
 try:
     from azure_video_pipeline.media_service import LocatorTypes
-    from azure_video_pipeline.utils import get_azure_config, get_media_service_client
+    from azure_video_pipeline.utils import (
+        get_azure_config, get_media_service_client, get_captions_info, get_video_info
+    )
 except ImportError:
     APP_AZURE_VIDEO_PIPLINE = False
 
@@ -230,42 +231,6 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             status__in=["file_complete", "file_encrypted"]
         ).order_by('-created', 'edx_video_id')
 
-    def get_video_info(self, video, path_locator_on_demand, path_locator_sas, asset_files):
-        download_video_url = ''
-
-        if path_locator_sas and video.status == 'file_complete':
-            file_size = 0
-            for asset_file in asset_files:
-                try:
-                    content_file_size = int(asset_file.get('ContentFileSize', 0))
-                except ValueError:
-                    content_file_size = 0
-
-                if asset_file.get('Name', '').endswith('.mp4') and content_file_size > file_size:
-                    name_file = asset_file['Name']
-                    file_size = content_file_size
-                    download_video_url = u'/{}?'.format(name_file).join(path_locator_sas.split('?'))
-
-        return {
-            'smooth_streaming_url': u'{}{}/manifest'.format(
-                path_locator_on_demand, video.client_video_id.replace('mp4', 'ism')
-            ) if path_locator_on_demand else '',
-            'download_video_url': download_video_url,
-        }
-
-    def get_captions_info(self, video, path_locator_sas):
-        data = []
-        if path_locator_sas:
-            for subtitle in video.subtitles.all():
-                data.append({
-                    'download_url': '/{}?'.format(subtitle.content).join(path_locator_sas.split('?')),
-                    'file_name': subtitle.content,
-                    'language': subtitle.language,
-                    'language_title': dict(all_languages()).get(subtitle.language)
-                })
-
-        return data
-
     def drop_http_or_https(self, url):
         """
         In order to avoid mixing HTTP/HTTPS which can cause some warnings to appear in some browsers.
@@ -301,7 +266,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
                 if locator_sas:
                     path_locator_sas = self.drop_http_or_https(locator_sas.get('Path'))
-                    captions = self.get_captions_info(video, path_locator_sas)
+                    captions = get_captions_info(video, path_locator_sas)
                     asset_files = media_service.get_asset_files(asset['Id'])
                 else:
                     error_message = _("To be able to use captions/transcripts auto-fetching, "
@@ -309,7 +274,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                                       "(in addition to 'streaming' locator a 'progressive' "
                                       "locator must be created as well).")
 
-                video_info = self.get_video_info(video, path_locator_on_demand, path_locator_sas, asset_files)
+                video_info = get_video_info(video, path_locator_on_demand, path_locator_sas, asset_files)
 
         return {'error_message': error_message,
                 'video_info': video_info,
