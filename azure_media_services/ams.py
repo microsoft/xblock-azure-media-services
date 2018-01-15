@@ -104,7 +104,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     transcripts_enabled = Boolean(
         display_name=_("Transcripts enabled"),
         help=_("Transcripts switch"),
-        default=False,
+        default=True,
         scope=Scope.settings
     )
     download_url = String(
