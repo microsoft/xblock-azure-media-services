@@ -28,7 +28,7 @@ class AMSXBlockTests(unittest.TestCase):
         self.assertEqual(block.token_issuer, 'http://openedx.microsoft.com/')
         self.assertEqual(block.token_scope, 'urn:xblock-azure-media-services')
         self.assertEqual(block.captions, [])
-        self.assertEqual(block.transcripts_enabled, False)
+        self.assertEqual(block.transcripts_enabled, True)
         self.assertEqual(block.download_url, None)
 
     @mock.patch('azure_media_services.ams.get_azure_config', return_value={})
