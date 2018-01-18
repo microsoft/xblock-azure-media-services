@@ -177,13 +177,9 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Student view of this component.
 
-        Arguments:
-            context (dict): XBlock context
-
-        Returns:
-            xblock.fragment.Fragment: XBlock HTML fragment
+        Arguments: context (dict): XBlock context
+        Returns: xblock.fragment.Fragment: XBlock HTML fragment
         """
-
         fragment = Fragment()
         context.update(self._get_context_for_template())
         fragment.add_content(loader.render_django_template('/templates/player.html', context))
