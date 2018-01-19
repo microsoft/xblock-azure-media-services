@@ -1,4 +1,4 @@
-/* global tinyMCE baseUrl gettext */
+/* global tinyMCE baseUrl gettext _ */
 
 /**
  * Javascript for StudioEditableXBlockMixin.
@@ -14,6 +14,8 @@ function StudioEditableXBlockMixin(runtime, element) {
     // Studio includes a copy of tinyMCE and its jQuery plugin
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined');
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
+    var handlerUrlGetCaptionsAndVideoInfo = runtime.handlerUrl(element, 'get_captions_and_video_info');
+    var $containerCaptions = $(element).find('.js-container-captions');
 
     $(element).find('.field-data-control').each(function() {
         var $field = $(this);
@@ -193,6 +195,126 @@ function StudioEditableXBlockMixin(runtime, element) {
         }
         runtime.notify('cancel', {});
     });
+    /**
+     * Handle error messages
+     * @param jqXHR
+     */
+    function showErrorFail(jqXHR) {
+        var message = gettext('This may be happening because of an error with our server or your internet ' +
+                'connection. Try refreshing the page or making sure you are online.');
+        if (jqXHR.responseText) { // Is there a more specific error message we can show?
+            try {
+                message = JSON.parse(jqXHR.responseText).error;
+                if (typeof message === 'object' && message.messages) {
+                    // e.g. {"error": {"messages": [{"text": "Unknown user 'bob'!", "type": "error"}, ...]}} etc.
+                    message = $.map(message.messages, function(msg) { return msg.text; }).join(', ');
+                }
+            } catch (error) { message = jqXHR.responseText.substr(0, 300); }
+        }
+        runtime.notify('error', {title: gettext('Unable to update settings'), message: message});
+    }
+
+    /**
+     * setCaptionsField
+     */
+    function setCaptionsField() {
+        var captions = [];
+        $containerCaptions.find('[name = "captions"]:checked').each(function() {
+            var caption = {
+                kind: 'subtitles',
+                src: $(this).val(),
+                srclang: $(this).data('srclang'),
+                label: $(this).data('label')
+            };
+            captions.push(caption);
+        });
+        $(element).find('[data-field-name = "captions"] textarea').val(JSON.stringify(captions))
+            .trigger('change');
+    }
+
+    /**
+     * setOnChangeCaptions
+     */
+    function setOnChangeCaptions() {
+        $containerCaptions.find('[name = "captions"]').on('change', setCaptionsField);
+    }
+
+    /**
+     * renderCaptions
+     * @param data
+     */
+    function renderCaptions(data) {
+        var i, template;
+        $containerCaptions.empty();
+        template = _.template(
+            '<li class="select-holder"><div class="wrap-input-captions">' +
+            '<input id="checkbox-captions-<%= id %>" type="checkbox" name="captions" value="<%= downloadUrl %>" ' +
+            'data-srclang="<%= language %>" data-label="<%= languageTitle %>"/>' +
+            '<label for="checkbox-captions-<%= id %>"><%= fileName %> (<%= language %>)</label></div></li>'
+        );
+        if (data.length === 0) {
+            $containerCaptions.text(gettext('No captions/transcripts available for selected video.'));
+        } else {
+            for (i = 0; i < data.length; i++) {
+                $containerCaptions.append(
+                    template({
+                        id: i,
+                        downloadUrl: data[i].download_url,
+                        language: data[i].language,
+                        languageTitle: data[i].language_title,
+                        fileName: data[i].file_name
+                    })
+                );
+            }
+            setOnChangeCaptions();
+        }
+    }
+
+    /**
+     * setVideoInfo
+     * @param videInfo
+     */
+    function setVideoInfo(videInfo) {
+        $(element).find('[data-field-name = "download_url"] input').val(videInfo.download_video_url)
+            .trigger('change');
+        $(element).find('[data-field-name = "video_url"] input').val(videInfo.smooth_streaming_url)
+            .trigger('change');
+    }
+
+    /**
+     * resetCaptionsField
+     */
+    function resetCaptionsField() {
+        $(element).find('[data-field-name = "captions"] textarea').val(JSON.stringify([]))
+            .trigger('change');
+    }
+
+    /**
+     * getCaptionsAndVideoInfo
+     * @param edxVideoID
+     */
+    function getCaptionsAndVideoInfo(edxVideoID) {
+        $containerCaptions.html('<div class="loader-wrapper"><span class="loader"><svg class="icon icon-spinner11">' +
+            '<use xlink:href="#icon-spinner11"></use></svg></span></div class="loader-wrapper">');
+        $.ajax({
+            type: 'POST',
+            url: handlerUrlGetCaptionsAndVideoInfo,
+            data: JSON.stringify({edx_video_id: edxVideoID}),
+            dataType: 'json',
+            success: function(data) {
+                if (data.error_message !== '') {
+                    $containerCaptions.html(
+                        _.template(
+                            '<span class="ams-info"><%= errorMessage %></span>'
+                        )({errorMessage: data.error_message})
+                    );
+                } else {
+                    renderCaptions(data.captions);
+                }
+                setVideoInfo(data.video_info);
+            }
+        }).fail(showErrorFail);
+    }
 
     $(element).find('.js-header-tab').on('click', function(e) {
         var $currentTarget = $(e.currentTarget);
@@ -202,5 +324,12 @@ function StudioEditableXBlockMixin(runtime, element) {
         $currentTarget.addClass('current');
         $(element).find('.component-tab').addClass('is-inactive');
         $(element).find('.' + dataTab).removeClass('is-inactive');
+    });
+
+    $(element).find('[name = "stream_video"]').on('change', function(e) {
+        var $currentTarget = $(e.currentTarget);
+        var edxVideoID = $currentTarget.val();
+        resetCaptionsField();
+        getCaptionsAndVideoInfo(edxVideoID);
     });
 }

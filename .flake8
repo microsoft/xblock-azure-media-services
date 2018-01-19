@@ -11,3 +11,4 @@ show-source = True
 statistics = True
 count = True
 import-order-style = google
+application-import-names = azure_media_services

@@ -36,7 +36,6 @@ setup(
         'bleach',
         'mako',
         'XBlock',
-        'azure==2.0.0',
     ],
     entry_points={
         'xblock.v1': [

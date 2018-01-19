@@ -19,6 +19,10 @@
     font-size: 13px;
 }
 
+.amp-default-skin .vjs-control-bar .azure-media-player-toggle-button-style.amp-subtitles-control:before {
+    font-size: 13px;
+}
+
 .azuremediaplayer {
     border: 0 !important;
 }
