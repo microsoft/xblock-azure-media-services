@@ -1,4 +1,4 @@
-/* global tinyMCE baseUrl gettext */
+/* global tinyMCE baseUrl gettext _ */
 
 /**
  * Javascript for StudioEditableXBlockMixin.
@@ -244,18 +244,27 @@ function StudioEditableXBlockMixin(runtime, element) {
      * @param data
      */
     function renderCaptions(data) {
-        var i, html;
+        var i, template;
         $containerCaptions.empty();
+        template = _.template(
+            '<li class="select-holder"><div class="wrap-input-captions">' +
+            '<input id="checkbox-captions-<%= id %>" type="checkbox" name="captions" value="<%= downloadUrl %>" ' +
+            'data-srclang="<%= language %>" data-label="<%= languageTitle %>"/>' +
+            '<label for="checkbox-captions-<%= id %>"><%= fileName %> (<%= language %>)</label></div></li>'
+        );
         if (data.length === 0) {
             $containerCaptions.text(gettext('No captions/transcripts available for selected video.'));
         } else {
             for (i = 0; i < data.length; i++) {
-                html = '<li class="select-holder"><div class="wrap-input-captions"><input id="checkbox-captions-' + i +
-                        '" type="checkbox" name="captions" value="' + data[i].download_url +
-                        '" data-srclang="' + data[i].language + '" data-label="' + data[i].language_title +
-                        '"/><label for="checkbox-captions-' + i + '">' + data[i].file_name +
-                        ' (' + data[i].language + ')</label></div></li>';
-                $containerCaptions.append(html);
+                $containerCaptions.append(
+                    template({
+                        id: i,
+                        downloadUrl: data[i].download_url,
+                        language: data[i].language,
+                        languageTitle: data[i].language_title,
+                        fileName: data[i].file_name
+                    })
+                );
             }
             setOnChangeCaptions();
         }
@@ -294,7 +303,11 @@ function StudioEditableXBlockMixin(runtime, element) {
             dataType: 'json',
             success: function(data) {
                 if (data.error_message !== '') {
-                    $containerCaptions.html('<span class="ams-info">' + data.error_message + '</span>');
+                    $containerCaptions.html(
+                        _.template(
+                            '<span class="ams-info"><%= errorMessage %></span>'
+                        )({errorMessage: data.error_message})
+                    );
                 } else {
                     renderCaptions(data.captions);
                 }

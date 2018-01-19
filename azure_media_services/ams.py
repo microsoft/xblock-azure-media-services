@@ -20,7 +20,7 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 
 from .utils import _
 
-APP_AZURE_VIDEO_PIPLINE = True
+APP_AZURE_VIDEO_PIPELINE = True
 
 try:
     from azure_video_pipeline.media_service import LocatorTypes
@@ -28,7 +28,7 @@ try:
         get_azure_config, get_media_service_client, get_captions_info, get_video_info
     )
 except ImportError:
-    APP_AZURE_VIDEO_PIPLINE = False
+    APP_AZURE_VIDEO_PIPELINE = False
 
 
 log = logging.getLogger(__name__)
@@ -124,7 +124,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         Render a form for editing this XBlock.
         """
         try:
-            azure_config = get_azure_config(self.location.org) if APP_AZURE_VIDEO_PIPLINE else {}
+            azure_config = get_azure_config(self.location.org) if APP_AZURE_VIDEO_PIPELINE else {}
         except ImproperlyConfigured:
             azure_config = {}
         list_stream_videos = []

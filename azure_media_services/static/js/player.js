@@ -5,15 +5,15 @@
 
 
 var events = {
-    played: 'edx.video.played',
-    paused: 'edx.video.paused',
-    stopped: 'edx.video.stopped',
-    positionChanged: 'edx.video.position.changed',
-    transcriptShown: 'edx.video.transcript.show',
-    transcriptsHidden: 'edx.video.transcript.hidden',
-    videoLoaded: 'edx.video.loaded',
-    captionsShown: 'edx.video.closed_captions.shown',
-    captionsHidden: 'edx.video.closed_captions.hidden'
+    PLAYED: 'edx.video.played',
+    PAUSED: 'edx.video.paused',
+    STOPPED: 'edx.video.stopped',
+    POSITION_CHANGED: 'edx.video.position.changed',
+    TRANSCRIPT_SHOWN: 'edx.video.transcript.show',
+    TRANSCRIPTS_HIDDEN: 'edx.video.transcript.hidden',
+    VIDEO_LOADED: 'edx.video.loaded',
+    CAPTIONS_SHOWN: 'edx.video.closed_captions.shown',
+    CAPTIONS_HIDDEN: 'edx.video.closed_captions.hidden'
 };
 
 
@@ -232,7 +232,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
         this.addEventListener(amp.eventName.pause,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, events.paused, {});
+                sendPlayerEvent(eventPostUrl, events.PAUSED, {});
 
                 if (timeHandler !== null) {
                     clearInterval(timeHandler);
@@ -242,7 +242,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
         this.addEventListener(amp.eventName.play,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, events.played, {});
+                sendPlayerEvent(eventPostUrl, events.PLAYED, {});
 
                 timeHandler = setInterval(
                     function() {
@@ -281,7 +281,7 @@ function AzureMediaServicesBlock(runtime, container) {
 
                         if ($.trim($target.html()) === 'Off') {
                             $vidAndTranscript.addClass('closed');
-                            reportEvent = events.transcriptsHidden;
+                            reportEvent = events.TRANSCRIPTS_HIDDEN;
                         } else {
                             if ($transcriptElement.length) {
                                 handleData(fetchTranscriptUrl, {
@@ -298,24 +298,24 @@ function AzureMediaServicesBlock(runtime, container) {
                                 });
                             }
                             $vidAndTranscript.removeClass('closed');
-                            reportEvent = events.transcriptShown;
+                            reportEvent = events.TRANSCRIPT_SHOWN;
                         }
                         sendPlayerEvent(eventPostUrl, reportEvent, {});
                     });
                 }
-                sendPlayerEvent(eventPostUrl, events.videoLoaded, {});
+                sendPlayerEvent(eventPostUrl, events.VIDEO_LOADED, {});
             }
         );
 
         this.addEventListener(amp.eventName.seeked,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, events.positionChanged, {});
+                sendPlayerEvent(eventPostUrl, events.POSITION_CHANGED, {});
             }
         );
 
         this.addEventListener(amp.eventName.ended,
             function(evt) { // eslint-disable-line no-unused-vars
-                sendPlayerEvent(eventPostUrl, events.stopped, {});
+                sendPlayerEvent(eventPostUrl, events.STOPPED, {});
 
                 if (timeHandler !== null) {
                     clearInterval(timeHandler);
@@ -328,11 +328,11 @@ function AzureMediaServicesBlock(runtime, container) {
         subtitleEls = $(container).find('.vjs-subtitles-button .vjs-menu-item');
 
         subtitleEls.mousedown(function(evt) {
-            var reportEvent = events.captionsShown;
+            var reportEvent = events.CAPTIONS_SHOWN;
             // TODO: we should attach to a different event. For example, this can also be toggled via keyboard.
             languageName = $(evt.target).html();
             if (languageName === 'Off') {
-                reportEvent = events.captionsHidden;
+                reportEvent = events.CAPTIONS_HIDDEN;
                 languageName = '';
             }
 
