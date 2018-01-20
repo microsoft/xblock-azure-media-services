@@ -1,6 +1,6 @@
 {
   "name": "ams_xblock",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Azure Media Player XBlock",
   "dependencies": {
     "videojs-vtt.js": "0.12.4"
