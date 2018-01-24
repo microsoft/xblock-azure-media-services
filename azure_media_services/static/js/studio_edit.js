@@ -250,7 +250,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             '<li class="select-holder"><div class="wrap-input-captions">' +
             '<input id="checkbox-captions-<%= id %>" type="checkbox" name="captions" value="<%= downloadUrl %>" ' +
             'data-srclang="<%= language %>" data-label="<%= languageTitle %>"/>' +
-            '<label for="checkbox-captions-<%= id %>"><%= fileName %> (<%= language %>)</label></div></li>'
+            '<label for="checkbox-captions-<%= id %>"><%= fileName %> (<%= languageTitle %>)</label></div></li>'
         );
         if (data.length === 0) {
             $containerCaptions.text(gettext('No captions/transcripts available for selected video.'));
