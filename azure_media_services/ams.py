@@ -63,6 +63,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default="",
         scope=Scope.settings
     )
+    edx_video_id = String(
+        default="",
+        scope=Scope.settings
+    )
     # Ultimately this should come via some secure means, but this is OK for a PoC
     verification_key = String(
         display_name=_("Verification Key"),
@@ -101,6 +105,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         help=_("A list of caption definitions"),
         scope=Scope.settings
     )
+    caption_ids = List(
+        default=[],
+        scope=Scope.settings
+    )
     transcripts_enabled = Boolean(
         display_name=_("Transcripts enabled"),
         help=_("Transcripts switch"),
@@ -117,6 +125,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     editable_fields = (
         'display_name', 'video_url', 'verification_key', 'protection_type',
         'token_issuer', 'token_scope', 'captions', 'transcripts_enabled', 'download_url',
+        'edx_video_id', 'caption_ids'
     )
 
     def studio_view(self, context):
@@ -135,6 +144,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             'fields': [],
             'has_azure_config': len(azure_config) != 0,
             'list_stream_videos': list_stream_videos,
+            'edx_video_id': self.edx_video_id,
+            'caption_ids': self.caption_ids
         }
         fragment = Fragment()
         # Build a list of all the fields that can be edited:

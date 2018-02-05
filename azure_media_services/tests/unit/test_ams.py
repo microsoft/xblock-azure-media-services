@@ -52,7 +52,7 @@ class AMSXBlockTests(unittest.TestCase):
         context = render_django_template.call_args[0][1]
         self.assertEqual(context['has_azure_config'], False)
         self.assertEqual(context['list_stream_videos'], [])
-        self.assertEqual(len(context['fields']), 9)
+        self.assertEqual(len(context['fields']), 11)
 
         frag.add_javascript.assert_called_once_with('static/js/studio_edit.js')
         frag.add_css.assert_called_once_with("public/css/studio.css")
