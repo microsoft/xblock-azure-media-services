@@ -16,6 +16,10 @@ function StudioEditableXBlockMixin(runtime, element) {
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
     var handlerUrlGetCaptionsAndVideoInfo = runtime.handlerUrl(element, 'get_captions_and_video_info');
     var $containerCaptions = $(element).find('.js-container-captions');
+    var $inputEdxVideoId = $(element).find('[data-field-name = "edx_video_id"] input');
+    var $inputVideoUrl = $(element).find('[data-field-name = "video_url"] input');
+    var $textareaCaptions = $(element).find('[data-field-name = "captions"] textarea');
+    var $textareaCaptionIds = $(element).find('[data-field-name = "caption_ids"] textarea');
 
     $(element).find('.field-data-control').each(function() {
         var $field = $(this);
@@ -61,7 +65,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         $field.bind('change input paste', fieldChanged);
         $resetButton.click(function() {
             // Use attr instead of data to force treating the default value as a string
-            $field.val($wrapper.attr('data-default'));
+            $field.val($wrapper.attr('data-default')).trigger('change');
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
         });
@@ -218,7 +222,8 @@ function StudioEditableXBlockMixin(runtime, element) {
      * setCaptionsField
      */
     function setCaptionsField() {
-        var captions = [];
+        var captions = [],
+            captionIds = [];
         $containerCaptions.find('[name = "captions"]:checked').each(function() {
             var caption = {
                 kind: 'subtitles',
@@ -227,9 +232,10 @@ function StudioEditableXBlockMixin(runtime, element) {
                 label: $(this).data('label')
             };
             captions.push(caption);
+            captionIds.push($(this).data('id'));
         });
-        $(element).find('[data-field-name = "captions"] textarea').val(JSON.stringify(captions))
-            .trigger('change');
+        $textareaCaptions.val(JSON.stringify(captions)).trigger('change', true);
+        $textareaCaptionIds.val(JSON.stringify(captionIds)).trigger('change');
     }
 
     /**
@@ -244,13 +250,17 @@ function StudioEditableXBlockMixin(runtime, element) {
      * @param data
      */
     function renderCaptions(data) {
-        var i, template;
+        var i, template, isRenderCaptions, captionIds;
         $containerCaptions.empty();
+        isRenderCaptions = $containerCaptions.hasClass('render_captions');
+        captionIds = $containerCaptions.data('caption-ids');
+        $containerCaptions.addClass('render_captions');
         template = _.template(
             '<li class="select-holder"><div class="wrap-input-captions">' +
             '<input id="checkbox-captions-<%= id %>" type="checkbox" name="captions" value="<%= downloadUrl %>" ' +
-            'data-srclang="<%= language %>" data-label="<%= languageTitle %>"/>' +
-            '<label for="checkbox-captions-<%= id %>"><%= fileName %> (<%= language %>)</label></div></li>'
+            'data-srclang="<%= language %>" data-label="<%= languageTitle %>" ' +
+            'data-id="<%= captionId %>" <% if (checked) { %> checked <% } %>/>' +
+            '<label for="checkbox-captions-<%= id %>"><%= fileName %> (<%= languageTitle %>)</label></div></li>'
         );
         if (data.length === 0) {
             $containerCaptions.text(gettext('No captions/transcripts available for selected video.'));
@@ -259,10 +269,12 @@ function StudioEditableXBlockMixin(runtime, element) {
                 $containerCaptions.append(
                     template({
                         id: i,
+                        captionId: data[i].id,
                         downloadUrl: data[i].download_url,
                         language: data[i].language,
                         languageTitle: data[i].language_title,
-                        fileName: data[i].file_name
+                        fileName: data[i].file_name,
+                        checked: (!isRenderCaptions && $.inArray(data[i].id, captionIds) !== -1)
                     })
                 );
             }
@@ -277,23 +289,30 @@ function StudioEditableXBlockMixin(runtime, element) {
     function setVideoInfo(videInfo) {
         $(element).find('[data-field-name = "download_url"] input').val(videInfo.download_video_url)
             .trigger('change');
-        $(element).find('[data-field-name = "video_url"] input').val(videInfo.smooth_streaming_url)
-            .trigger('change');
+        $inputVideoUrl.val(videInfo.smooth_streaming_url).trigger('change', [true]);
+    }
+
+    /**
+     * setVideoInfo
+     * @param edxVideoID
+     */
+    function setEdxVideoIdField(edxVideoID) {
+        $inputEdxVideoId.val(edxVideoID).trigger('change');
     }
 
     /**
      * resetCaptionsField
      */
     function resetCaptionsField() {
-        $(element).find('[data-field-name = "captions"] textarea').val(JSON.stringify([]))
-            .trigger('change');
+        $textareaCaptions.val(JSON.stringify([])).trigger('change', true);
+        $textareaCaptionIds.val(JSON.stringify([])).trigger('change');
     }
 
     /**
      * getCaptionsAndVideoInfo
-     * @param edxVideoID
+     * @param edxVideoID, setData
      */
-    function getCaptionsAndVideoInfo(edxVideoID) {
+    function getCaptionsAndVideoInfo(edxVideoID, setData) {
         $containerCaptions.html('<div class="loader-wrapper"><span class="loader"><svg class="icon icon-spinner11">' +
             '<use xlink:href="#icon-spinner11"></use></svg></span></div class="loader-wrapper">');
         $.ajax({
@@ -311,7 +330,9 @@ function StudioEditableXBlockMixin(runtime, element) {
                 } else {
                     renderCaptions(data.captions);
                 }
-                setVideoInfo(data.video_info);
+                if (setData) {
+                    setVideoInfo(data.video_info);
+                }
             }
         }).fail(showErrorFail);
     }
@@ -324,12 +345,33 @@ function StudioEditableXBlockMixin(runtime, element) {
         $currentTarget.addClass('current');
         $(element).find('.component-tab').addClass('is-inactive');
         $(element).find('.' + dataTab).removeClass('is-inactive');
+
+        if ($inputEdxVideoId.val() && !$containerCaptions.hasClass('render_captions')) {
+            getCaptionsAndVideoInfo($inputEdxVideoId.val(), false);
+        }
     });
 
     $(element).find('[name = "stream_video"]').on('change', function(e) {
         var $currentTarget = $(e.currentTarget);
         var edxVideoID = $currentTarget.val();
         resetCaptionsField();
-        getCaptionsAndVideoInfo(edxVideoID);
+        getCaptionsAndVideoInfo(edxVideoID, true);
+        setEdxVideoIdField(edxVideoID);
+    });
+
+    $inputVideoUrl.on('change input paste', function(event, trigger) {
+        if (!trigger) {
+            $inputEdxVideoId.val('').trigger('change');
+            $(element).find('[name = "stream_video"]').prop('checked', false);
+            $textareaCaptionIds.val(JSON.stringify([])).trigger('change');
+            $containerCaptions.find('[name = "captions"]').prop('checked', false);
+        }
+    });
+
+    $textareaCaptions.on('change input paste', function(event, trigger) {
+        if (!trigger) {
+            $textareaCaptionIds.val(JSON.stringify([])).trigger('change');
+            $containerCaptions.find('[name = "captions"]').prop('checked', false);
+        }
     });
 }
