@@ -182,7 +182,13 @@ Transcripts are very similar to captions/subtitles, but it is designed more for 
 
 Transcript features are part of Open edX and the implementation in the Azure Media Services xBlocks is meant to be a “feature parity” compared to the out-of-the-box video player support in Open edX.
 
+**_Transcripts downloading_**
 
+If any transcripts available the *downloads button* appears in player's control bar. This button opens *Download dashboard*:
+
+![Download Dashboard](docs/img/transcripts-download.png)
+
+To download desired transcript file one must choose 'Transcript' (asset type to download), pick the language and hit the Download button.
 
 Analytic Events
 ---------------
