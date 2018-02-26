@@ -1,0 +1,1 @@
+/projects/azure-media-player-transcripts-plugin/transcriptsAmpPlugin.js

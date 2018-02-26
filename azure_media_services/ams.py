@@ -205,6 +205,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_css_url('//amp.azure.net/libs/amp/2.1.5/skins/amp-default/azuremediaplayer.min.css')
         fragment.add_javascript_url('//amp.azure.net/libs/amp/2.1.5/azuremediaplayer.min.js')
 
+        fragment.add_javascript(loader.load_unicode('static/js/plugins/transcriptsAmpPlugin.js'))
         fragment.add_javascript(loader.load_unicode('static/js/player.js'))
 
         fragment.add_css(loader.load_unicode('public/css/player.css'))
