@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
-/* global WebVTT _ amp gettext runtime */
+/* global _ amp gettext runtime */
 
 
 var events = {
@@ -47,18 +47,11 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     //  entirely removes the xblock markup from the DOM.
     var transcripts = [];
     var player = amp($(container).find('video')[0], null, function() { // eslint-disable-line no-unused-vars
-        // Preserve
-        var self = this;
-
         var subtitleEls;
         var languageName;
-        var eventPostUrl;
-        var fetchTranscriptUrl;
+        var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
 
-        // Add event handlers
-        eventPostUrl = runtime.handlerUrl(container, 'publish_event');
-        fetchTranscriptUrl = runtime.handlerUrl(container, 'fetch_transcript');
-
+        // Add event handlers:
         this.addEventListener(amp.eventName.pause,
             function() {
                 sendPlayerEvent(eventPostUrl, events.PAUSED, {});
@@ -107,6 +100,7 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
         });
     });
 
+    // xBlock's Studio editor has switch control for transcripts download button:
     if (jsonArgs.transcripts_enabled) {
         for (var i = 0; i < jsonArgs.transcripts.length; i++) { // eslint-disable-line vars-on-top
             transcripts.push(
@@ -118,6 +112,6 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
             );
         }
         player.downloadableMedia(transcripts);
-        player.transcriptsAmpPlugin({container: container});
+        player.transcriptsAmpPlugin();
     }
 }
