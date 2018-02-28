@@ -69,3 +69,7 @@
     pointer-events: none;
     text-transform: uppercase;
 }
+
+.video-wrapper .vjs-transcripts-button ul {
+   list-style: none !important;
+}
