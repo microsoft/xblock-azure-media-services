@@ -44,7 +44,6 @@
     transition: 0.3s;
 }
 .video {
-    width: 800px;
     display: flex;
 }
 .azuremediaplayer {

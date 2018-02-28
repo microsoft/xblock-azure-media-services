@@ -208,6 +208,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_javascript(loader.load_unicode('static/js/plugins/transcriptsAmpPlugin.js'))
         fragment.add_javascript(loader.load_unicode('static/js/player.js'))
 
+        fragment.add_css(loader.load_unicode('static/js/plugins/transcriptsAmpPlugin.css'))
         fragment.add_css(loader.load_unicode('public/css/player.css'))
 
         # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
