@@ -75,6 +75,7 @@ function syncTimer(player, transcriptCues, $transcriptElement) {
     var cue;
     var isActive;
     var $targetElement;
+    var scrollUpSize;
     var $transcriptItems = $transcriptElement.find('.azure-media-xblock-transcript-element');
     var currentTime = player.currentTime();
 
@@ -97,10 +98,9 @@ function syncTimer(player, transcriptCues, $transcriptElement) {
                 $targetElement.addClass('current');
 
                 // Autoscroll.
-                // TODO: this formula is brittle. It uses "magic numbers." It should instead use
-                //    information from the layout like: $transcriptElement's height,
-                //    $transcriptElement's scroll-position, $targetElement's location, etc.
-                $transcriptElement.scrollTo((i + 1) * 29.5, 1000);
+                scrollUpSize = Math.abs($transcriptElement.offset().top - $transcriptItems.first().offset().top) +
+                               ($targetElement.offset().top - $transcriptElement.offset().top);
+                $transcriptElement.scrollTo(scrollUpSize, 1000);
             }
             return;
         }
@@ -150,7 +150,7 @@ function initTranscript(player, transcript, $transcriptElement) {
 
     // Creates transcript markup.
     // TODO: use Backbone's client-side templating view (underscore)
-    html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
+    html = '<ol class="subtitles-menu" style="list-style:none;">';
     for (var i = 0; i < cues.length; i++) { // eslint-disable-line vars-on-top
         cue = cues[i];
 
@@ -196,11 +196,12 @@ function initTranscript(player, transcript, $transcriptElement) {
  * @param container
  * @constructor
  */
-function AzureMediaServicesBlock(runtime, container) {
+function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     'use strict';
     // IMPORTANT: We pass the <video> DOM element instead of its class or id. This mitigates
     //  a bug when switching units. Changing units triggers a "partial navigation" which
     //  entirely removes the xblock markup from the DOM.
+    var transcripts = [];
     var player = amp($(container).find('video')[0], null, function() { // eslint-disable-line no-unused-vars
         // Preserve
         var self = this;
@@ -265,12 +266,11 @@ function AzureMediaServicesBlock(runtime, container) {
                     $vidParent.find('.amp-controlbaricons-right').first().append($transcriptButton);
 
                     $transcriptButtonMenu = $transcriptButton.find('.vjs-menu').first();
-                    $transcriptButtonMenu.css({right: '0px', left: 'inherit'});
                     $transcriptButton.on('mouseenter mouseleave', (function() {
                         $transcriptButtonMenu.toggle();
                     }));
 
-                    $transcriptButtonMenu.on('click', function(evt) {
+                    $transcriptButtonMenu.on('click', '.vjs-menu-item', function(evt) {
                         var $target = $(evt.target);
                         $transcriptButtonMenu.find('.vjs-menu-item')
                             .removeClass('vjs-selected')
@@ -339,4 +339,17 @@ function AzureMediaServicesBlock(runtime, container) {
             sendPlayerEvent(eventPostUrl, reportEvent, {language_name: languageName});
         });
     });
+
+    if (jsonArgs.transcripts_enabled) {
+        for (var i = 0; i < jsonArgs.transcripts.length; i++) { // eslint-disable-line vars-on-top
+            transcripts.push(
+                {
+                    lang: jsonArgs.transcripts[i].srclang,
+                    type: 'transcript',
+                    uri: jsonArgs.transcripts[i].src
+                }
+            );
+        }
+        player.downloadableMedia(transcripts);
+    }
 }

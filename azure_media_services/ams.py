@@ -173,7 +173,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "video_url": self.video_url,
             "protection_type": self.protection_type,
             "captions": self.captions,
-            "transcripts_enabled": self.transcripts_enabled and self.captions,
+            "transcripts_enabled": bool(self.transcripts_enabled and self.captions),
             "download_url": self.download_url,
         }
 
@@ -202,8 +202,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         '''
         fragment.add_javascript(loader.load_unicode('node_modules/videojs-vtt.js/lib/vttcue.js'))
 
-        fragment.add_css_url('//amp.azure.net/libs/amp/1.8.1/skins/amp-default/azuremediaplayer.min.css')
-        fragment.add_javascript_url('//amp.azure.net/libs/amp/1.8.1/azuremediaplayer.min.js')
+        fragment.add_css_url('//amp.azure.net/libs/amp/2.1.5/skins/amp-default/azuremediaplayer.min.css')
+        fragment.add_javascript_url('//amp.azure.net/libs/amp/2.1.5/azuremediaplayer.min.js')
 
         fragment.add_javascript(loader.load_unicode('static/js/player.js'))
 
@@ -216,7 +216,13 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing
 
-        fragment.initialize_js('AzureMediaServicesBlock')
+        fragment.initialize_js(
+            'AzureMediaServicesBlock',
+            json_args={
+                'transcripts_enabled': context['transcripts_enabled'],
+                'transcripts': self.captions
+            }
+        )
         return fragment
 
     # xblock runtime navigation tab video image

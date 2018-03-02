@@ -27,38 +27,55 @@
 
         {% if transcripts_enabled %}
         {# This element is re-parented dynamically after the AMP is initialized and other buttons are positioned.#}
-        <div class="subtitles" data-transcript-url="">
+        <div class="subtitles js-transcripts-container" data-transcript-url="">
             <div class="azure-media-player-toggle-button-style
                         toggleTranscript
                         fa fa-quote-left
                         vjs-menu-button
+                        vjs-menu-button-popup
+                        vjs-control
+                        vjs-button
+                        outline-enabled-control
                         amp-subtitles-control"
-                 role="button" aria-live="polite" tabindex="0"
+                 role="menuitem"
+                 aria-live="off"
+                 tabindex="0"
+                 aria-expanded="false"
+                 aria-haspopup="true"
+                 aria-label="Transcripts Menu"
             >
-                <div class="vjs-control-content">
-                  <span class="vjs-control-text">Transcripts</span>
-                  <div class="vjs-menu">
-                    <ul class="vjs-menu-content">
-                      <li class="vjs-menu-item vjs-selected" role="button" aria-live="polite" tabindex="0"
-                          aria-selected="true">
-                        Off
-                      </li>
+                <div class="vjs-menu" role="presentation">
+                    <ul class="vjs-menu-content" role="menu">
+                        <li class="amp-menu-header">Transcripts</li>
+                        <li class="vjs-menu-item vjs-selected outline-enabled-control"
+                            tabindex="-1"
+                            role="menuitemcheckbox"
+                            aria-live="off"
+                            aria-label="Transcripts Off"
+                            aria-checked="true"
+                        >
+                            Off
+                        </li>
 
-                      {% for transcript in captions %}
-                      <li class="vjs-menu-item" role="button" aria-live="polite" tabindex="0" aria-selected="false"
-                          data-srclang="{{ transcript.srclang }}" data-src="{{ transcript.src }}"
-                      >
-                        {{ transcript.label }}
-                      </li>
+                        {% for transcript in captions %}
+                        <li class="vjs-menu-item outline-enabled-control"
+                            role="menuitemcheckbox"
+                            aria-live="off"
+                            tabindex="-1"
+                            aria-label="{{ transcript.label }}"
+                            aria-checked="false"
+                            data-srclang="{{ transcript.srclang }}"
+                            data-src="{{ transcript.src }}"
+                        >
+                            {{ transcript.label }}
+                            <span class="vjs-control-text"> </span
+                        </li>
                       {% endfor %}
-
-                      <li class="amp-menu-header">Transcripts</li>
                     </ul>
-                  </div>
                 </div>
+                <span class="vjs-control-text">Transcripts</span>
             </div>
         </div>
-
         {% endif %}
     </div>
 
@@ -66,17 +83,6 @@
         {% if download_url %}
         <li style="list-style-type: none;" class="video-sources video-download-button">
             <a role="button" href="{{ download_url }}" download>Download video</a>
-        </li>
-        {% endif %}
-
-        {% if transcripts_enabled %}
-        <li style="list-style-type: none;" class="video-tracks video-download-button">
-          Download transcripts:
-          <div class="dropdown-content">
-            {% for transcript in captions %}
-            <a href="{{ transcript.src }}" download title="{{ transcript.label }}">{{ transcript.label }}</a>
-            {% endfor %}
-          </div>
         </li>
         {% endif %}
     </ul>
