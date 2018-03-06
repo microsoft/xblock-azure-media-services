@@ -26,23 +26,54 @@
   </div>
 
   <div class="downloads-container">
-    <ul class="wrapper-downloads-custom">
+    <ul class="wrapper-downloads-custom wrapper-downloads">
+
+      {% if share %}
+      <li class="share-button video-download-button-custom">
+        <a role="button" href="#" class="js-share-button btn">{% trans 'Share' %}</a>
+        <div class="share-popup-callout is-hidden js-share-popup">
+          <div class="share-callout-content">
+            <div class="share-this-lesson-text">{% trans 'Share this lesson' %}</div>
+            <hr class="separatorLineEmbed">
+            <div class="embed-content">
+              <label for="txtContentEmbed" class="title-lesson-embed bold">{% trans 'Embed this lesson' %}</label>
+              <div class="text-content-embed">
+                <textarea id="txtContentEmbed" readonly="readonly" data-url="{{ embed_url }}"></textarea>
+              </div>
+              <div class="size-embed">
+                <label for="ddlSizeEmbed" class="text-size-embed">{% trans 'Size' %}</label>
+                <select class="ddlSizeEmbed" id="ddlSizeEmbed" >
+                  <option data-width="426" data-height="472" value="small" selected>426 x 472 pixels</option>
+                  <option data-width="636" data-height="480" value="default">636 x 480 pixels</option>
+                  <option data-width="814" data-height="664" value="large">814 x 664 pixels</option>
+                </select>
+              </div>
+            </div>
+            <div class="embed-tou">
+              The player is governed by this <a href="https://mva.microsoft.com/license" target="_blank">license</a>.
+              Please read it. By copying or displaying this player, you agree to abide by this license. If you do not agree, do not copy or display the player.
+            </div>
+          </div>
+        </div>
+      </li>
+      {% endif %}
+
       {% if assets_download %}
         {% if download_url %}
-          <li style="list-style-type: none;" class="video-download-button-custom">
-            <a role="button" href="{{ download_url }}" download>Download video</a>
+          <li class="video-download-button-custom">
+            <a role="button" href="{{ download_url }}" download class="btn">{% trans 'Download video' %}</a>
           </li>
         {% endif %}
 
         {% if transcripts_enabled %}
         <li class="video-transcript video-download-button-custom" id="download-transcripts-button">
           <div class="dropdown">
-            <a href="#" class="download-transcript dropdown">
+            <a href="#" class="download-transcript dropdown btn">
               {% trans 'Download transcripts' %}
             </a>
             <div class="dropdown-content dropdown">
               {% for transcript in captions %}
-                <a href="{{ transcript.src }}"
+                <a href="{{ transcript.src }}" class="btn"
                    download="{{ transcript.label|lower }}_{{ transcript.srclang }}.vtt">
                   {{ transcript.label }}
                 </a>
@@ -51,9 +82,7 @@
           </div>
         </li>
         {% endif %}
-
       {% endif %}
     </ul>
   </div>
-
 </div>

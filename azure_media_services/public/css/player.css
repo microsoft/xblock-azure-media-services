@@ -94,7 +94,7 @@ body .azuremediaplayer button:focus {
     margin: 10px;
 }
 
-.video-download-button-custom a {
+.video-download-button-custom a.btn {
     transition: all 0.25s ease-in-out 0s;
     font-size: 14px;
     line-height: 14px;
@@ -104,7 +104,7 @@ body .azuremediaplayer button:focus {
     padding: 15px;
 }
 
-.video-download-button-custom a:hover {
+.video-download-button-custom a.btn:hover {
     background-color: #0075b4;
     color: #fff;
     border-radius: 3px;
@@ -114,16 +114,16 @@ body .azuremediaplayer button:focus {
 .dropdown {
     display: inline-block;
     position: relative;
-    bottom: 0px;
+    bottom: 0;
     border-radius: 3px;
 }
 
 .dropdown-content {
     display: none;
     position: absolute;
-    bottom: 0px;
+    bottom: 0;
     background-color: #f9f9f9;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     z-index: 999;
     width: 180px;
     min-width: 180px;
@@ -149,4 +149,100 @@ body .azuremediaplayer button:focus {
 .dropdown:hover {
     background-color: #0075b4 !important;
     color: #fff !important;
+}
+
+.wrapper-downloads,
+.course-wrapper .course-content .vert-mod>div ul.wrapper-downloads,
+.course-wrapper .courseware-results-wrapper .vert-mod>div ul.wrapper-downloads {
+    display: flex;
+    margin: 12px 0;
+    list-style: none;
+    padding: 0;
+}
+.wrapper-downloads li {
+    margin-right: 12px;
+    position: relative;
+}
+.share-popup-callout {
+    z-index: 10;
+    position: absolute;
+    background: #fff;
+    padding: 20px;
+    top: -40px;
+    transform: translate(-3%,-96%);
+    width: 400px;
+    border: 1px solid gray;
+}
+
+.share-this-lesson-text {
+    font-weight: 700;
+}
+.title-lesson-embed {
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+.text-content-embed,
+.size-embed {
+    margin-bottom: 12px;
+    position: relative;
+}
+.text-content-embed textarea {
+    width: 100%;
+    height: 160px;
+    background: #f1f1f1;
+    resize: none;
+}
+
+.text-content-embed textarea:focus {
+    outline: none;
+    border-color: #c8c8c8;
+    box-shadow: none;
+}
+.text-size-embed,
+.content-wrapper > .course-wrapper > .course-content {
+    display: block;
+    margin-bottom: 0;
+}
+.embed-tou {
+    padding: 5px;
+    border: 1px solid gray;
+    font-size: 14px;
+    position: relative;
+}
+.embed-tou::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 20px 20px 0 20px;
+    border-color: #fff transparent transparent transparent;
+    bottom: -20px;
+    position: absolute;
+    left: -7px;
+    transform: translate(0,100%);
+    z-index: 1;
+}
+.embed-tou::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 20px 20px 0 20px;
+    border-color: gray transparent transparent transparent;
+    bottom: -21px;
+    position: absolute;
+    left: -7px;
+    transform: translate(0,100%);
+    z-index: 0;
+}
+.ddlSizeEmbed {
+    border-radius: 0px;
+    -webkit-appearance: none;
+    padding: 10px 30px 10px 10px;
+    position: relative;
+    font-size: 15px;
+    width: 154px;
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDUwIDUwIiBoZWlnaHQ9IjUwcHgiIGlkPSJMYXllcl8xIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwcHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxyZWN0IGZpbGw9Im5vbmUiIGhlaWdodD0iNTAiIHdpZHRoPSI1MCIvPjxwb2x5Z29uIHBvaW50cz0iNDcuMjUsMTUgNDUuMTY0LDEyLjkxNCAyNSwzMy4wNzggNC44MzYsMTIuOTE0IDIuNzUsMTUgMjUsMzcuMjUgIi8+PC9zdmc+) no-repeat;
+    background-size: 13px 13px;
+    background-position: 92% 53%;
 }

@@ -22,15 +22,18 @@ var events = {
  * @param eventPostUrl
  * @param name
  * @param data
+ * @param userIsAuthenticated
  */
-function sendPlayerEvent(eventPostUrl, name, data) {
+function sendPlayerEvent(eventPostUrl, name, data, userIsAuthenticated) {
     'use strict';
-    data.event_type = name;  // eslint-disable-line no-param-reassign
-    $.ajax({
-        type: 'POST',
-        url: eventPostUrl,
-        data: JSON.stringify(data)
-    });
+    if (userIsAuthenticated) {
+        data.event_type = name;  // eslint-disable-line no-param-reassign
+        $.ajax({
+            type: 'POST',
+            url: eventPostUrl,
+            data: JSON.stringify(data)
+        });
+    }
 }
 
 
@@ -38,6 +41,7 @@ function sendPlayerEvent(eventPostUrl, name, data) {
  * Main xBlock initializer which interface is defined by xBlock API.
  * @param runtime
  * @param container
+ * @param jsonArgs
  * @constructor
  */
 function AzureMediaServicesBlock(runtime, container, jsonArgs) {
@@ -47,39 +51,44 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     //  entirely removes the xblock markup from the DOM.
     var downloadMediaList = [];
     var langSource;
+    var $sharePopup = $(container).find('.js-share-popup');
+    var $ddlSizeEmbed = $(container).find('#ddlSizeEmbed');
+    var $txtContentEmbed = $(container).find('#txtContentEmbed');
+
     var player = amp($(container).find('video')[0], null, function() { // eslint-disable-line no-unused-vars
         var subtitleEls;
         var languageName;
         var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
+        var userIsAuthenticated = jsonArgs.user_is_authenticated;
 
         // Add event handlers:
         this.addEventListener(amp.eventName.pause,
             function() {
-                sendPlayerEvent(eventPostUrl, events.PAUSED, {});
+                sendPlayerEvent(eventPostUrl, events.PAUSED, {}, userIsAuthenticated);
             }
         );
 
         this.addEventListener(amp.eventName.play,
             function() {
-                sendPlayerEvent(eventPostUrl, events.PLAYED, {});
+                sendPlayerEvent(eventPostUrl, events.PLAYED, {}, userIsAuthenticated);
             }
         );
 
         this.addEventListener(amp.eventName.loadeddata,
             function() {
-                sendPlayerEvent(eventPostUrl, events.VIDEO_LOADED, {});
+                sendPlayerEvent(eventPostUrl, events.VIDEO_LOADED, {}, userIsAuthenticated);
             }
         );
 
         this.addEventListener(amp.eventName.seeked,
             function() {
-                sendPlayerEvent(eventPostUrl, events.POSITION_CHANGED, {});
+                sendPlayerEvent(eventPostUrl, events.POSITION_CHANGED, {}, userIsAuthenticated);
             }
         );
 
         this.addEventListener(amp.eventName.ended,
             function() {
-                sendPlayerEvent(eventPostUrl, events.STOPPED, {});
+                sendPlayerEvent(eventPostUrl, events.STOPPED, {}, userIsAuthenticated);
             }
         );
 
@@ -97,11 +106,42 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
                 languageName = '';
             }
 
-            sendPlayerEvent(eventPostUrl, reportEvent, {language_name: languageName});
+            sendPlayerEvent(eventPostUrl, reportEvent, {language_name: languageName}, userIsAuthenticated);
         });
     });
 
     player.transcriptsAmpPlugin({hidden: !jsonArgs.transcripts_enabled});
+
+     /**
+     * Create a value for the txtContentEmbed field
+     */
+    function getContentEmbed() {
+        var embedUrl = $txtContentEmbed.data('url');
+        var width = $ddlSizeEmbed.find('option:selected').data('width');
+        var height = $ddlSizeEmbed.find('option:selected').data('height');
+        var iframeEmbed =
+        _.template(
+            '<iframe src="<%= embedUrl %>" width="<%= width %>" height="<%= height %>" ' +
+            'allowFullScreen frameBorder="0"></iframe>'
+        )({
+            embedUrl: embedUrl,
+            width: width,
+            height: height
+        });
+        return iframeEmbed;
+    }
+
+    $(container).find('.js-share-button').on('click', function(event) {
+        event.preventDefault();
+        $sharePopup.toggleClass('is-hidden');
+        if (!$txtContentEmbed.val()) {
+            $txtContentEmbed.val(getContentEmbed());
+        }
+    });
+
+    $ddlSizeEmbed.on('change', function() {
+        $txtContentEmbed.val(getContentEmbed());
+    });
 
     // Do not perform further media download processing if disabled:
     if (!jsonArgs.assets_download) return;

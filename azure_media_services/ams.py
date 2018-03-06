@@ -9,14 +9,20 @@ Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.
 """
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import NoReverseMatch, reverse
+from django.http import HttpResponseBadRequest
 from edxval.models import Video
+from opaque_keys.edx.keys import UsageKey
 import requests
+from util.views import ensure_valid_usage_key
 from xblock.core import XBlock
 from xblock.fields import Boolean, List, Scope, String
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xmodule.modulestore.django import modulestore
 
 from .utils import _, AssetsMode
 
@@ -133,14 +139,25 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings
     )
 
+    share = String(
+        display_name=_("Share the video"),
+        values=(
+            {'display_name': _("None"), "value": None},
+            {'display_name': _("Staff only"), "value": "staff_only"},
+            {'display_name': _("All"), "value": "all"}
+        ),
+        default=None,
+        scope=Scope.settings
+    )
+
     # These are what become visible in the Mixin editor
     editable_fields = (
         # Settings tab:
         'display_name', 'video_url', 'verification_key', 'protection_type',
         'token_issuer', 'token_scope', 'captions', 'transcripts_enabled',
-        'assets_download', 'download_url',
+        'assets_download', 'download_url', 'share',
         # Management tab:
-        'edx_video_id', 'caption_ids',
+        'edx_video_id', 'caption_ids'
     )
 
     def studio_view(self, context):
@@ -162,6 +179,12 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             'edx_video_id': self.edx_video_id,
             'caption_ids': self.caption_ids
         }
+
+        if self.get_embed_url() is None:
+            context.update({
+                "disable_share": True
+            })
+
         fragment = Fragment()
         # Build a list of all the fields that can be edited:
         for field_name in self.editable_fields:
@@ -191,12 +214,21 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "transcripts_enabled": bool(self.transcripts_enabled and self.captions),
             "download_url": self.download_url,
             "assets_download": self.assets_download in [AssetsMode.edx, AssetsMode.combi],
+            "share": False
         }
 
         if self.protection_type:
             context.update({
                 "auth_token": self.verification_key,
             })
+
+        if self.share:
+            embed_url = self.get_embed_url()
+            if embed_url and (self.share == 'all' or self.share == 'staff_only' and self.runtime.user_is_staff):
+                context.update({
+                    "share": True,
+                    "embed_url": embed_url
+                })
 
         return context
 
@@ -236,6 +268,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 'transcripts': self.captions,
                 'video_download_uri': context['download_url'],
                 'assets_download': self.assets_download in [AssetsMode.amp, AssetsMode.combi],
+                'user_is_authenticated': bool(self.runtime.user_id)
             }
         )
         return fragment
@@ -251,6 +284,17 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             if higher_class in child_classes:
                 new_class = higher_class
         return new_class
+
+    def get_embed_url(self):
+        try:
+            embed_url = reverse(
+                'embed_player',
+                kwargs={'usage_key_string': unicode(self.scope_ids.usage_id).encode('utf-8')}
+            )
+            embed_url = settings.LMS_ROOT_URL + embed_url
+        except NoReverseMatch:
+            embed_url = None
+        return embed_url
 
     def get_list_stream_videos(self):
         return Video.objects.filter(
@@ -353,3 +397,22 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             log.exception("Can't get content of the fetched transcript: language [{}]".format(transcript_lang))
             handler_response['message'] = _(failure_message)
             return handler_response
+
+
+@ensure_valid_usage_key
+def embed_player(request, usage_key_string):
+    from lms.djangoapps.courseware.module_render import get_module_by_usage_id
+    from lms.djangoapps.courseware.views.views import render_xblock
+
+    usage_key = UsageKey.from_string(usage_key_string)
+    usage_key = usage_key.replace(course_key=modulestore().fill_in_run(usage_key.course_key))
+    course_key = usage_key.course_key
+    with modulestore().bulk_operations(course_key):
+        block, _ = get_module_by_usage_id(
+            request, unicode(course_key), unicode(usage_key), disable_staff_debug_info=True,
+        )
+
+    if block.share:
+        return render_xblock(request, usage_key_string, check_if_enrolled=False)
+
+    return HttpResponseBadRequest("Embed player is not supported.")

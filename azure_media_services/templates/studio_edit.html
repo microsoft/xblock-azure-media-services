@@ -57,6 +57,7 @@
                         <select
                           class="field-data-control"
                           id="xb-field-edit-{{field.name}}"
+                          {% if field.name == 'share' and disable_share %}disabled{% endif %}
                         >
                           {% for option in field.values %}
                             <option value="{{option.value}}" {% if field.value == option.value %}selected{% endif %}>
