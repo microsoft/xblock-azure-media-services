@@ -71,6 +71,7 @@
     text-transform: uppercase;
 }
 
-ul.subtitles-menu {
-    list-style: none;
+div.vjs-menu ul.vjs-menu-content,
+div.tc-container ul.subtitles-menu {
+    list-style: none !important;
 }
