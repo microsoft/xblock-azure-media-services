@@ -13,10 +13,11 @@ def _(text):
     return text
 
 
-class AssetsMode():
+class AssetsMode(object):
     """
     Modes enum for `assets_download` xBlock field.
     """
+
     edx = "edx"
     amp = "amp"
     combi = "combined"

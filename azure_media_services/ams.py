@@ -13,7 +13,7 @@ from django.core.exceptions import ImproperlyConfigured
 from edxval.models import Video
 import requests
 from xblock.core import XBlock
-from xblock.fields import Boolean, List, Scope, String, JSONField
+from xblock.fields import Boolean, List, Scope, String
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin

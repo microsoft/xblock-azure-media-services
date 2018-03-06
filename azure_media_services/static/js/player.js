@@ -102,7 +102,7 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     });
 
     if (jsonArgs.transcripts_enabled) {
-        player.transcriptsAmpPlugin()
+        player.transcriptsAmpPlugin();
     }
 
     // Do not perform further media download processing if disabled:
@@ -117,7 +117,6 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
                 uri: jsonArgs.transcripts[i].src
             });
         }
-
     }
 
     langSource = downloadMediaList.length
