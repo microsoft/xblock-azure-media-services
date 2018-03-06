@@ -11,3 +11,13 @@ def _(text):
     Make '_' a no-op so we can scrape strings.
     """
     return text
+
+
+class AssetsMode():
+    """
+    Modes enum for `assets_download` xBlock field.
+    """
+    edx = "edx"
+    amp = "amp"
+    combi = "combined"
+    off = "off"

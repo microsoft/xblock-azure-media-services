@@ -12,13 +12,13 @@ import logging
 from django.core.exceptions import ImproperlyConfigured
 from edxval.models import Video
 import requests
-from xblock.core import List, Scope, String, XBlock
-from xblock.fields import Boolean
+from xblock.core import XBlock
+from xblock.fields import Boolean, List, Scope, String, JSONField
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
-from .utils import _
+from .utils import _, AssetsMode
 
 APP_AZURE_VIDEO_PIPELINE = True
 
@@ -115,6 +115,18 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default=True,
         scope=Scope.settings
     )
+    assets_download = String(
+        display_name=_("Assets download mode"),
+        help=_("Disables completely or enables download controls in xBlock/Player."),
+        default=AssetsMode.edx,
+        values=[
+            {"display_name": "Edx - way (footer links)", "value": AssetsMode.edx},
+            {"display_name": "Via Player (download dashboard)", "value": AssetsMode.amp},
+            {"display_name": "Combined", "value": AssetsMode.combi},
+            {"display_name": "Off", "value": AssetsMode.off},
+        ],
+        scope=Scope.settings
+    )
     download_url = String(
         display_name=_("Video Download URL"),
         help=_("A download URL"),
@@ -123,9 +135,12 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
     # These are what become visible in the Mixin editor
     editable_fields = (
+        # Settings tab:
         'display_name', 'video_url', 'verification_key', 'protection_type',
-        'token_issuer', 'token_scope', 'captions', 'transcripts_enabled', 'download_url',
-        'edx_video_id', 'caption_ids'
+        'token_issuer', 'token_scope', 'captions', 'transcripts_enabled',
+        'assets_download', 'download_url',
+        # Management tab:
+        'edx_video_id', 'caption_ids',
     )
 
     def studio_view(self, context):
@@ -175,6 +190,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "captions": self.captions,
             "transcripts_enabled": bool(self.transcripts_enabled and self.captions),
             "download_url": self.download_url,
+            "assets_download": self.assets_download in [AssetsMode.edx, AssetsMode.combi],
         }
 
         if self.protection_type:
@@ -210,10 +226,6 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         fragment.add_css(loader.load_unicode('static/js/plugins/transcriptsAmpPlugin.css'))
         fragment.add_css(loader.load_unicode('public/css/player.css'))
-
-        # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
-        # actually need to include our local copy of public/js/vendor/vtt.js. In fact, if we do
-        # the overlay subtitles stop working
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing

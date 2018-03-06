@@ -25,10 +25,12 @@
   </div>
 
   <ul class="wrapper-downloads">
-    {% if download_url %}
-      <li style="list-style-type: none;" class="video-sources video-download-button">
-        <a role="button" href="{{ download_url }}" download>Download video</a>
-      </li>
+    {% if assets_download %}
+      {% if download_url %}
+        <li style="list-style-type: none;" class="video-sources video-download-button">
+          <a role="button" href="{{ download_url }}" download>Download video</a>
+        </li>
+      {% endif %}
     {% endif %}
   </ul>
 
