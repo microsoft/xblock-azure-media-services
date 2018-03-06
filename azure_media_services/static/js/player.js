@@ -45,7 +45,8 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     // IMPORTANT: We pass the <video> DOM element instead of its class or id. This mitigates
     //  a bug when switching units. Changing units triggers a "partial navigation" which
     //  entirely removes the xblock markup from the DOM.
-    var transcripts = [];
+    var downloadMediaList = [];
+    var langSource;
     var player = amp($(container).find('video')[0], null, function() { // eslint-disable-line no-unused-vars
         var subtitleEls;
         var languageName;
@@ -103,15 +104,27 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     // xBlock's Studio editor has switch control for transcripts download button:
     if (jsonArgs.transcripts_enabled) {
         for (var i = 0; i < jsonArgs.transcripts.length; i++) { // eslint-disable-line vars-on-top
-            transcripts.push(
-                {
-                    lang: jsonArgs.transcripts[i].srclang,
-                    type: 'transcript',
-                    uri: jsonArgs.transcripts[i].src
-                }
-            );
+            downloadMediaList.push({
+                lang: jsonArgs.transcripts[i].srclang,
+                type: amp.downloadableMediaType.transcript,
+                uri: jsonArgs.transcripts[i].src
+            });
         }
-        player.downloadableMedia(transcripts);
         player.transcriptsAmpPlugin();
     }
+
+    langSource = downloadMediaList.length
+        ? downloadMediaList.slice()
+        : [{lang: player.language()}];
+
+    // Here we take care video download is available for all presented locales:
+    langSource.forEach(function(media) {
+        downloadMediaList.push({
+            lang: media.lang,
+            type: amp.downloadableMediaType.video,
+            uri: jsonArgs.video_download_uri
+        });
+    });
+
+    player.downloadableMedia(downloadMediaList);
 }

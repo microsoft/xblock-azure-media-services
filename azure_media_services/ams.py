@@ -217,12 +217,12 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing
-
         fragment.initialize_js(
             'AzureMediaServicesBlock',
             json_args={
                 'transcripts_enabled': context['transcripts_enabled'],
-                'transcripts': self.captions
+                'transcripts': self.captions,
+                'video_download_uri': context['download_url'],
             }
         )
         return fragment
