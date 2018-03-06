@@ -37,6 +37,7 @@
     padding: 0;
     color: #0074b5;
     line-height: 1.41575em;
+    cursor: pointer;
 }
 
 .video.closed .tc-container {
@@ -50,7 +51,7 @@
     width: 100%;
     transition: 0.3s;
 }
-.video.tc-wrapper .tc-container .subtitles-menu .azure-media-xblock-transcript-element.current {
+.video.tc-wrapper .tc-container .subtitles-menu .transcript-cue.current {
     font-weight: 600;
     color: #000;
 }
@@ -70,6 +71,6 @@
     text-transform: uppercase;
 }
 
-.video-wrapper .vjs-transcripts-button ul {
-   list-style: none !important;
+ul.subtitles-menu {
+    list-style: none;
 }
