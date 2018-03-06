@@ -235,6 +235,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 'transcripts_enabled': context['transcripts_enabled'],
                 'transcripts': self.captions,
                 'video_download_uri': context['download_url'],
+                'assets_download': self.assets_download in [AssetsMode.amp, AssetsMode.combi],
             }
         )
         return fragment

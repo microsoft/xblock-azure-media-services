@@ -101,6 +101,13 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
         });
     });
 
+    if (jsonArgs.transcripts_enabled) {
+        player.transcriptsAmpPlugin()
+    }
+
+    // Do not perform further media download processing if disabled:
+    if (!jsonArgs.assets_download) return;
+
     // xBlock's Studio editor has switch control for transcripts download button:
     if (jsonArgs.transcripts_enabled) {
         for (var i = 0; i < jsonArgs.transcripts.length; i++) { // eslint-disable-line vars-on-top
@@ -110,7 +117,7 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
                 uri: jsonArgs.transcripts[i].src
             });
         }
-        player.transcriptsAmpPlugin();
+
     }
 
     langSource = downloadMediaList.length
