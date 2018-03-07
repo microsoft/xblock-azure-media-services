@@ -76,3 +76,77 @@ body .azuremediaplayer button:focus {
 .amp-default-skin .vjs-mouse-display>span.amp-time-tooltip {
     white-space: nowrap;
 }
+
+.downloads-container {
+    background-color: #f0f3f5;
+    margin: -10px -12px;
+}
+
+.wrapper-downloads-custom {
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+}
+
+.video-download-button-custom {
+    display: inline-block;
+    vertical-align: top;
+    margin: 10px;
+}
+
+.video-download-button-custom a {
+    transition: all 0.25s ease-in-out 0s;
+    font-size: 14px;
+    line-height: 14px;
+    float: left;
+    border-radius: 3px;
+    background-color: #fff;
+    padding: 15px;
+}
+
+.video-download-button-custom a:hover {
+    background-color: #0075b4;
+    color: #fff;
+    border-radius: 3px;
+}
+
+/* Transcripts download dropdown buttons */
+.dropdown {
+    display: inline-block;
+    position: relative;
+    bottom: 0px;
+    border-radius: 3px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    bottom: 0px;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 999;
+    width: 180px;
+    min-width: 180px;
+    overflow: visible;
+    background: transparent;
+}
+
+.dropdown-content a {
+    color: black;
+    text-decoration: none;
+    display: block;
+    min-width: 160px;
+}
+
+.dropdown-content a:hover {
+    background-color: #0075b4
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover {
+    background-color: #0075b4 !important;
+    color: #fff !important;
+}

@@ -2,6 +2,7 @@
   Copyright (c) Microsoft Corporation. All Rights Reserved.
   Licensed under the MIT license. See LICENSE file on the project webpage for details.
   -->
+{% load i18n %}
 
 <div class="xmodule_display xmodule_VideoModule">
 
@@ -24,14 +25,33 @@
     </video>
   </div>
 
-  <ul class="wrapper-downloads">
-    {% if assets_download %}
-      {% if download_url %}
-        <li style="list-style-type: none;" class="video-sources video-download-button">
-          <a role="button" href="{{ download_url }}" download>Download video</a>
+  <div class="downloads-container">
+    <ul class="wrapper-downloads-custom">
+      {% if assets_download %}
+        {% if download_url %}
+          <li style="list-style-type: none;" class="video-download-button-custom">
+            <a role="button" href="{{ download_url }}" download>Download video</a>
+          </li>
+        {% endif %}
+
+        <li class="video-transcript video-download-button-custom" id="download-transcripts-button">
+          <div class="dropdown">
+            <a href="#" class="download-transcript dropdown">
+              {% trans 'Download transcripts' %}
+            </a>
+            <div class="dropdown-content dropdown">
+              {% for transcript in captions %}
+                <a href="{{ transcript.src }}"
+                   download="{{ transcript.label|lower }}_{{ transcript.srclang }}.vtt">
+                  {{ transcript.label }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
         </li>
+
       {% endif %}
-    {% endif %}
-  </ul>
+    </ul>
+  </div>
 
 </div>
