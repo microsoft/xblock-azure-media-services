@@ -142,11 +142,11 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     share = String(
         display_name=_("Share the video"),
         values=(
-            {'display_name': _("None"), "value": None},
+            {'display_name': _("Off"), "value": 'off'},
             {'display_name': _("Staff only"), "value": "staff_only"},
             {'display_name': _("All"), "value": "all"}
         ),
-        default=None,
+        default='off',
         scope=Scope.settings
     )
 
@@ -412,7 +412,7 @@ def embed_player(request, usage_key_string):
             request, unicode(course_key), unicode(usage_key), disable_staff_debug_info=True,
         )
 
-    if block.share:
+    if block.share != 'off':
         return render_xblock(request, usage_key_string, check_if_enrolled=False)
 
     return HttpResponseBadRequest("Embed player is not supported.")
