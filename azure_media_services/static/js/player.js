@@ -101,9 +101,7 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
         });
     });
 
-    if (jsonArgs.transcripts_enabled) {
-        player.transcriptsAmpPlugin();
-    }
+    player.transcriptsAmpPlugin({hidden: !jsonArgs.transcripts_enabled});
 
     // Do not perform further media download processing if disabled:
     if (!jsonArgs.assets_download) return;

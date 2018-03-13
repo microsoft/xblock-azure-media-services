@@ -34,6 +34,7 @@
           </li>
         {% endif %}
 
+        {% if transcripts_enabled %}
         <li class="video-transcript video-download-button-custom" id="download-transcripts-button">
           <div class="dropdown">
             <a href="#" class="download-transcript dropdown">
@@ -49,6 +50,7 @@
             </div>
           </div>
         </li>
+        {% endif %}
 
       {% endif %}
     </ul>
