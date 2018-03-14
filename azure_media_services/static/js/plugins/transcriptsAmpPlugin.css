@@ -12,6 +12,7 @@
     visibility: visible;
     margin: 0;
     vertical-align: baseline;
+    z-index: 999;
 }
 
 .video .tc-container .subtitles-menu {
