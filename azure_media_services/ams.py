@@ -203,7 +203,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.initialize_js('StudioEditableXBlockMixin')
         return fragment
 
-    def _get_context_for_template(self):
+    def _get_context_for_template(self, embedded):
         """
         Add parameters for the student view.
         """
@@ -222,9 +222,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 "auth_token": self.verification_key,
             })
 
-        if self.share:
+        if self.share and not embedded:
             embed_url = self.get_embed_url()
-            if embed_url and (self.share == 'all' or self.share == 'staff_only' and self.runtime.user_is_staff):
+            if embed_url and (self.share == 'all' and self.runtime.user_id
+                              or self.share == 'staff_only' and self.runtime.user_is_staff):
                 context.update({
                     "share": True,
                     "embed_url": embed_url
@@ -240,7 +241,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         Returns: xblock.fragment.Fragment: XBlock HTML fragment
         """
         fragment = Fragment()
-        context.update(self._get_context_for_template())
+
+        context.update(self._get_context_for_template(context.get('embedded')))
         fragment.add_content(loader.render_django_template('/templates/player.html', context))
 
         '''
@@ -291,7 +293,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 'embed_player',
                 kwargs={'usage_key_string': unicode(self.scope_ids.usage_id).encode('utf-8')}
             )
-            embed_url = settings.LMS_ROOT_URL + embed_url
+            embed_url = "{}{}?embedded=true".format(settings.LMS_ROOT_URL, embed_url)
         except NoReverseMatch:
             embed_url = None
         return embed_url
