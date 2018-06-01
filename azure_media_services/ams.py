@@ -9,16 +9,22 @@ Built using documentation from: http://amp.azure.net/libs/amp/latest/docs/index.
 """
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import NoReverseMatch, reverse
+from django.http import HttpResponseBadRequest
 from edxval.models import Video
+from opaque_keys.edx.keys import UsageKey
 import requests
-from xblock.core import List, Scope, String, XBlock
-from xblock.fields import Boolean
+from util.views import ensure_valid_usage_key
+from xblock.core import XBlock
+from xblock.fields import Boolean, List, Scope, String
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xmodule.modulestore.django import modulestore
 
-from .utils import _
+from .utils import _, AssetsMode
 
 APP_AZURE_VIDEO_PIPELINE = True
 
@@ -115,16 +121,42 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         default=True,
         scope=Scope.settings
     )
+    assets_download = String(
+        display_name=_("Assets download mode"),
+        help=_("Disables completely or enables download controls in xBlock/Player."),
+        default=AssetsMode.edx,
+        values=[
+            {"display_name": "Edx - way (footer links)", "value": AssetsMode.edx},
+            {"display_name": "Via Player (download dashboard)", "value": AssetsMode.amp},
+            {"display_name": "Combined", "value": AssetsMode.combi},
+            {"display_name": "Off", "value": AssetsMode.off},
+        ],
+        scope=Scope.settings
+    )
     download_url = String(
         display_name=_("Video Download URL"),
         help=_("A download URL"),
         scope=Scope.settings
     )
 
+    share = String(
+        display_name=_("Share the video"),
+        values=(
+            {'display_name': _("Off"), "value": 'off'},
+            {'display_name': _("Staff only"), "value": "staff_only"},
+            {'display_name': _("All"), "value": "all"}
+        ),
+        default='off',
+        scope=Scope.settings
+    )
+
     # These are what become visible in the Mixin editor
     editable_fields = (
+        # Settings tab:
         'display_name', 'video_url', 'verification_key', 'protection_type',
-        'token_issuer', 'token_scope', 'captions', 'transcripts_enabled', 'download_url',
+        'token_issuer', 'token_scope', 'captions', 'transcripts_enabled',
+        'assets_download', 'download_url', 'share',
+        # Management tab:
         'edx_video_id', 'caption_ids'
     )
 
@@ -147,6 +179,12 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             'edx_video_id': self.edx_video_id,
             'caption_ids': self.caption_ids
         }
+
+        if self.get_embed_url() is None:
+            context.update({
+                "disable_share": True
+            })
+
         fragment = Fragment()
         # Build a list of all the fields that can be edited:
         for field_name in self.editable_fields:
@@ -165,7 +203,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.initialize_js('StudioEditableXBlockMixin')
         return fragment
 
-    def _get_context_for_template(self):
+    def _get_context_for_template(self, embedded):
         """
         Add parameters for the student view.
         """
@@ -175,12 +213,23 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "captions": self.captions,
             "transcripts_enabled": bool(self.transcripts_enabled and self.captions),
             "download_url": self.download_url,
+            "assets_download": self.assets_download in [AssetsMode.edx, AssetsMode.combi],
+            "share": False
         }
 
         if self.protection_type:
             context.update({
                 "auth_token": self.verification_key,
             })
+
+        if self.share and not embedded:
+            embed_url = self.get_embed_url()
+            if embed_url and (self.share == 'all' and self.runtime.user_id
+                              or self.share == 'staff_only' and self.runtime.user_is_staff):
+                context.update({
+                    "share": True,
+                    "embed_url": embed_url
+                })
 
         return context
 
@@ -192,7 +241,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         Returns: xblock.fragment.Fragment: XBlock HTML fragment
         """
         fragment = Fragment()
-        context.update(self._get_context_for_template())
+
+        context.update(self._get_context_for_template(context.get('embedded')))
         fragment.add_content(loader.render_django_template('/templates/player.html', context))
 
         '''
@@ -205,22 +255,22 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_css_url('//amp.azure.net/libs/amp/2.1.5/skins/amp-default/azuremediaplayer.min.css')
         fragment.add_javascript_url('//amp.azure.net/libs/amp/2.1.5/azuremediaplayer.min.js')
 
+        fragment.add_javascript(loader.load_unicode('static/js/plugins/transcriptsAmpPlugin.js'))
         fragment.add_javascript(loader.load_unicode('static/js/player.js'))
 
+        fragment.add_css(loader.load_unicode('static/js/plugins/transcriptsAmpPlugin.css'))
         fragment.add_css(loader.load_unicode('public/css/player.css'))
-
-        # NOTE: The Azure Media Player JS file includes the VTT JavaScript library, so we don't
-        # actually need to include our local copy of public/js/vendor/vtt.js. In fact, if we do
-        # the overlay subtitles stop working
 
         # @TODO: Make sure all fields are well structured/formatted, if it is not correct, then
         # print out an error msg in view rather than just silently failing
-
         fragment.initialize_js(
             'AzureMediaServicesBlock',
             json_args={
                 'transcripts_enabled': context['transcripts_enabled'],
-                'transcripts': self.captions
+                'transcripts': self.captions,
+                'video_download_uri': context['download_url'],
+                'assets_download': self.assets_download in [AssetsMode.amp, AssetsMode.combi],
+                'user_is_authenticated': bool(self.runtime.user_id)
             }
         )
         return fragment
@@ -236,6 +286,17 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             if higher_class in child_classes:
                 new_class = higher_class
         return new_class
+
+    def get_embed_url(self):
+        try:
+            embed_url = reverse(
+                'embed_player',
+                kwargs={'usage_key_string': unicode(self.scope_ids.usage_id).encode('utf-8')}
+            )
+            embed_url = "{}{}?embedded=true".format(settings.LMS_ROOT_URL, embed_url)
+        except NoReverseMatch:
+            embed_url = None
+        return embed_url
 
     def get_list_stream_videos(self):
         return Video.objects.filter(
@@ -338,3 +399,22 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             log.exception("Can't get content of the fetched transcript: language [{}]".format(transcript_lang))
             handler_response['message'] = _(failure_message)
             return handler_response
+
+
+@ensure_valid_usage_key
+def embed_player(request, usage_key_string):
+    from lms.djangoapps.courseware.module_render import get_module_by_usage_id
+    from lms.djangoapps.courseware.views.views import render_xblock
+
+    usage_key = UsageKey.from_string(usage_key_string)
+    usage_key = usage_key.replace(course_key=modulestore().fill_in_run(usage_key.course_key))
+    course_key = usage_key.course_key
+    with modulestore().bulk_operations(course_key):
+        block, _ = get_module_by_usage_id(
+            request, unicode(course_key), unicode(usage_key), disable_staff_debug_info=True,
+        )
+
+    if block.share != 'off':
+        return render_xblock(request, usage_key_string, check_if_enrolled=False)
+
+    return HttpResponseBadRequest("Embed player is not supported.")

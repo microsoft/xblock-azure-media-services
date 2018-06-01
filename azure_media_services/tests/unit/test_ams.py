@@ -1,6 +1,7 @@
 import json
 import unittest
 
+from django.core.urlresolvers import NoReverseMatch
 import mock
 import requests
 from xblock.field_data import DictFieldData
@@ -17,6 +18,7 @@ class AMSXBlockTests(unittest.TestCase):
         field_data = DictFieldData(kw)
         block = AMSXBlock(mock.Mock(), field_data, mock.Mock())
         block.location = mock.Mock(org='org_name', course_key='course_key')
+        block.scope_ids = mock.Mock(usage_id='usage_id')
         return block
 
     def test_default_fields_xblock(self):
@@ -31,12 +33,13 @@ class AMSXBlockTests(unittest.TestCase):
         self.assertEqual(block.transcripts_enabled, True)
         self.assertEqual(block.download_url, None)
 
+    @mock.patch('azure_media_services.ams.AMSXBlock.get_embed_url', return_value=None)
     @mock.patch('azure_media_services.ams.get_azure_config', return_value={})
     @mock.patch('azure_media_services.ams.loader.load_unicode', side_effect=('public/css/studio.css',
                                                                              'static/js/studio_edit.js'))
     @mock.patch('azure_media_services.ams.loader.render_django_template')
     @mock.patch('azure_media_services.ams.Fragment')
-    def test_studio_view(self, fragment, render_django_template, load_unicode, get_azure_config):
+    def test_studio_view(self, fragment, render_django_template, load_unicode, get_azure_config, get_embed_url):
         """
         Test studio view is displayed correctly.
         """
@@ -44,6 +47,7 @@ class AMSXBlockTests(unittest.TestCase):
         frag = block.studio_view({})
 
         get_azure_config.assert_called_once_with('org_name')
+        get_embed_url.assert_called_once_with()
         render_django_template.assert_called_once()
 
         template_arg = render_django_template.call_args[0][0]
@@ -52,7 +56,7 @@ class AMSXBlockTests(unittest.TestCase):
         context = render_django_template.call_args[0][1]
         self.assertEqual(context['has_azure_config'], False)
         self.assertEqual(context['list_stream_videos'], [])
-        self.assertEqual(len(context['fields']), 11)
+        self.assertEqual(len(context['fields']), 13)
 
         frag.add_javascript.assert_called_once_with('static/js/studio_edit.js')
         frag.add_css.assert_called_once_with("public/css/studio.css")
@@ -219,3 +223,17 @@ class AMSXBlockTests(unittest.TestCase):
         request_get_mock.assert_called_once_with(test_data['srcUrl'])
         logger_mock.assert_called_once_with(test_log_message)
         self.assertEqual(handler_response.json, {'result': 'error', 'message': test_failure_message})
+
+    @mock.patch('azure_media_services.ams.reverse', return_value='/embed_url/')
+    def test_get_embed_url(self, reverse):
+        block = self.make_one()
+        embed_url = block.get_embed_url()
+        reverse.assert_called_once_with('embed_player', kwargs={'usage_key_string': 'usage_id'})
+        self.assertEqual(embed_url, 'http://lms.com/embed_url/')
+
+    @mock.patch('azure_media_services.ams.reverse', side_effect=NoReverseMatch)
+    def test_get_embed_url_NoReverseMatch(self, reverse):
+        block = self.make_one()
+        embed_url = block.get_embed_url()
+        reverse.assert_called_once_with('embed_player', kwargs={'usage_key_string': 'usage_id'})
+        self.assertIsNone(embed_url)

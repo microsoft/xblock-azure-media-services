@@ -2,90 +2,87 @@
   Copyright (c) Microsoft Corporation. All Rights Reserved.
   Licensed under the MIT license. See LICENSE file on the project webpage for details.
   -->
+{% load i18n %}
 
-<div class="xmodule_display xmodule_VideoModule">
-<div class="video closed">
+<div>
 
-    <div class="tc-wrapper">
-        <div class="azuremediaplayer">
-            <video class="amp-default-skin amp-big-play-centered video-wrapper"
-                   data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
-                <source
-                    src="{{ video_url }}"
-                    type="application/vnd.ms-sstr+xml"
-                    {% if protection_type %}
-                    data-setup='{"protectionInfo": [{"type": "{{ protection_type }}", "authenticationToken": "Bearer={{ auth_token }}"}]}'
-                    {% endif %}
-                />
+  <div class="azuremediaplayer">
+    <video class="amp-default-skin amp-big-play-centered video-wrapper"
+           data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
+      <source
+        src="{{ video_url }}"
+        type="application/vnd.ms-sstr+xml"
+        {% if protection_type %}
+        data-setup='{"protectionInfo": [{"type": "{{ protection_type }}", "authenticationToken": "Bearer={{ auth_token }}"}]}'
+        {% endif %}
+      />
 
-                {% for caption in captions %}
-                <track kind="{{ caption.kind }}" src="{{ caption.src }}" srclang="{{ caption.srclang }}" label="{{ caption.label }}" />
-                {% endfor %}
+      {% for caption in captions %}
+        <track kind="{{ caption.kind }}" src="{{ caption.src }}" srclang="{{ caption.srclang }}"
+               label="{{ caption.label }}"/>
+      {% endfor %}
 
-            </video>
+    </video>
+  </div>
+
+  <div class="downloads-container">
+    <ul class="wrapper-downloads-custom wrapper-downloads">
+
+      {% if share %}
+      <li class="share-button video-download-button-custom">
+        <a role="button" href="#" class="js-share-button btn">{% trans 'Share' %}</a>
+        <div class="share-popup-callout is-hidden js-share-popup">
+          <div class="share-callout-content">
+            <div class="share-this-lesson-text">{% trans 'Share this lesson' %}</div>
+            <hr class="separatorLineEmbed">
+            <div class="embed-content">
+              <label for="txtContentEmbed" class="title-lesson-embed bold">{% trans 'Embed this lesson' %}</label>
+              <div class="text-content-embed">
+                <textarea id="txtContentEmbed" readonly="readonly" data-url="{{ embed_url }}"></textarea>
+              </div>
+              <div class="size-embed">
+                <label for="ddlSizeEmbed" class="text-size-embed">{% trans 'Size' %}</label>
+                <select class="ddlSizeEmbed" id="ddlSizeEmbed" >
+                  <option data-width="426" data-height="472" value="small" selected>426 x 472 pixels</option>
+                  <option data-width="636" data-height="480" value="default">636 x 480 pixels</option>
+                  <option data-width="814" data-height="664" value="large">814 x 664 pixels</option>
+                </select>
+              </div>
+            </div>
+            <div class="embed-tou">
+              The player is governed by this <a href="https://mva.microsoft.com/license" target="_blank">license</a>.
+              Please read it. By copying or displaying this player, you agree to abide by this license. If you do not agree, do not copy or display the player.
+            </div>
+          </div>
         </div>
+      </li>
+      {% endif %}
+
+      {% if assets_download %}
+        {% if download_url %}
+          <li class="video-download-button-custom">
+            <a role="button" href="{{ download_url }}" download class="btn" target="_blank">{% trans 'Download video' %}</a>
+          </li>
+        {% endif %}
 
         {% if transcripts_enabled %}
-        {# This element is re-parented dynamically after the AMP is initialized and other buttons are positioned.#}
-        <div class="subtitles js-transcripts-container" data-transcript-url="">
-            <div class="azure-media-player-toggle-button-style
-                        toggleTranscript
-                        fa fa-quote-left
-                        vjs-menu-button
-                        vjs-menu-button-popup
-                        vjs-control
-                        vjs-button
-                        outline-enabled-control
-                        amp-subtitles-control"
-                 role="menuitem"
-                 aria-live="off"
-                 tabindex="0"
-                 aria-expanded="false"
-                 aria-haspopup="true"
-                 aria-label="Transcripts Menu"
-            >
-                <div class="vjs-menu" role="presentation">
-                    <ul class="vjs-menu-content" role="menu">
-                        <li class="amp-menu-header">Transcripts</li>
-                        <li class="vjs-menu-item vjs-selected outline-enabled-control"
-                            tabindex="-1"
-                            role="menuitemcheckbox"
-                            aria-live="off"
-                            aria-label="Transcripts Off"
-                            aria-checked="true"
-                        >
-                            Off
-                        </li>
-
-                        {% for transcript in captions %}
-                        <li class="vjs-menu-item outline-enabled-control"
-                            role="menuitemcheckbox"
-                            aria-live="off"
-                            tabindex="-1"
-                            aria-label="{{ transcript.label }}"
-                            aria-checked="false"
-                            data-srclang="{{ transcript.srclang }}"
-                            data-src="{{ transcript.src }}"
-                        >
-                            {{ transcript.label }}
-                            <span class="vjs-control-text"> </span
-                        </li>
-                      {% endfor %}
-                    </ul>
-                </div>
-                <span class="vjs-control-text">Transcripts</span>
+        <li class="video-transcript video-download-button-custom" id="download-transcripts-button">
+          <div class="dropdown">
+            <a href="#" class="download-transcript dropdown btn">
+              {% trans 'Download transcripts' %}
+            </a>
+            <div class="dropdown-content dropdown">
+              {% for transcript in captions %}
+                <a href="{{ transcript.src }}" class="btn"
+                   download="{{ transcript.label|lower }}_{{ transcript.srclang }}.vtt">
+                  {{ transcript.label }}
+                </a>
+              {% endfor %}
             </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <ul class="wrapper-downloads">
-        {% if download_url %}
-        <li style="list-style-type: none;" class="video-sources video-download-button">
-            <a role="button" href="{{ download_url }}" download>Download video</a>
+          </div>
         </li>
         {% endif %}
+      {% endif %}
     </ul>
-
-</div>
+  </div>
 </div>

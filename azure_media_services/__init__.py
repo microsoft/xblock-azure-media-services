@@ -4,6 +4,7 @@
 """
 Runtime will load the XBlock class from here.
 """
+import django
 from django.conf import settings
 import mock
 
@@ -18,11 +19,20 @@ if not settings.configured:
     sys.modules['edxval'] = mock.MagicMock()
     sys.modules['edxval.models'] = mock.MagicMock()
 
-    sys.modules['openedx'] = mock.MagicMock()
-    sys.modules['openedx.core'] = mock.MagicMock()
-    sys.modules['openedx.core.djangoapps'] = mock.MagicMock()
-    sys.modules['openedx.core.djangoapps.lang_pref'] = mock.MagicMock()
-    sys.modules['openedx.core.djangoapps.lang_pref.api'] = mock.MagicMock()
+    sys.modules['util'] = mock.MagicMock()
+    sys.modules['util.views'] = mock.MagicMock()
 
+    sys.modules['opaque_keys'] = mock.MagicMock()
+    sys.modules['opaque_keys.edx'] = mock.MagicMock()
+    sys.modules['opaque_keys.edx.keys'] = mock.MagicMock()
+
+    sys.modules['xmodule'] = mock.MagicMock()
+    sys.modules['xmodule.modulestore'] = mock.MagicMock()
+    sys.modules['xmodule.modulestore.django'] = mock.MagicMock()
+
+    settings.configure(
+        LMS_ROOT_URL='http://lms.com'
+    )
+    django.setup()
 
 from .ams import AMSXBlock  # noqa: F401
