@@ -248,3 +248,28 @@ If transcripts feature is enabled new `TRANSCRIPTS` control  and transcripts dow
 ![Transcript Setting](docs/img/transcritps-controls.png)
 
 If configured correctly, the entire WebVTT file will be read and presented in the scrolling region to the right of the video player. When the video plays, you will notice that the current text associated with the video track will be highlighted. The viewer can click on any piece of the transcript text and the video player will seek to the time associated to that portion of the clicked transcript.
+
+
+Assets downloading
+------------------
+Assets (video, transcripts) downloading can be performed in different modes. Certain download mode is configured in Studio editor by setting `Assets download mode` switch field:
+- Edx-way (footer links) - (default) only footer download buttons are shown beneath the Player;
+- Via Player (download dashboard) - only download player's control button is available;
+- Combined - first two options enabled simultaneously;
+- Off - assets downloading disabled.
+
+![Download modes](docs/img/download-modes.png)
+
+![Assets downloading](docs/img/assets-downloading.png)
+
+
+Sharing option
+--------------
+The video can be shared in standard `embed iframe` way by copying generated html code snippet into the desired environment. By default sharing feature is disabled and it can be configured by corresponding Studio editor control:
+- Off - disabled (default);
+- Staff only - only _staff_ users can see `share` button;
+- All - sharing is available for everyone.
+
+![Video share](docs/img/video-share.png)
+
+![Share popup](docs/img/share-popup.png)
