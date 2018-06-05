@@ -55,7 +55,7 @@ function AzureMediaServicesBlock(runtime, container, jsonArgs) {
     var $ddlSizeEmbed = $(container).find('#ddlSizeEmbed');
     var $txtContentEmbed = $(container).find('#txtContentEmbed');
 
-    var player = amp($(container).find('video')[0], null, function() { // eslint-disable-line no-unused-vars
+    var player = amp($(container).find('.xblock-video-amp')[0], null, function() { // eslint-disable-line no-unused-vars
         var subtitleEls;
         var languageName;
         var eventPostUrl = runtime.handlerUrl(container, 'publish_event');

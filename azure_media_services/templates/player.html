@@ -7,7 +7,7 @@
 <div>
 
   <div class="azuremediaplayer">
-    <video class="amp-default-skin amp-big-play-centered video-wrapper"
+    <video class="xblock-video-amp amp-default-skin amp-big-play-centered video-wrapper"
            data-setup='{ "controls": true, "autoplay": false, "logo": {"enabled": false}, "height": 460 }'>
       <source
         src="{{ video_url }}"
@@ -67,11 +67,11 @@
 
         {% if transcripts_enabled %}
         <li class="video-transcript video-download-button-custom" id="download-transcripts-button">
-          <div class="dropdown">
-            <a href="#" class="download-transcript dropdown btn">
+          <div class="dropdown-title">
+            <a href="#" class="download-transcript dropdown-title btn">
               {% trans 'Download transcripts' %}
             </a>
-            <div class="dropdown-content dropdown">
+            <div class="dropdown-content">
               {% for transcript in captions %}
                 <a href="{{ transcript.src }}" class="btn"
                    download="{{ transcript.label|lower }}_{{ transcript.srclang }}.vtt">

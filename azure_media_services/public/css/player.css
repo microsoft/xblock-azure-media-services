@@ -113,7 +113,7 @@ body .azuremediaplayer button:focus {
 }
 
 /* Transcripts download dropdown buttons */
-.dropdown {
+.dropdown-title {
     display: inline-block;
     position: relative;
     bottom: 0;
@@ -144,11 +144,11 @@ body .azuremediaplayer button:focus {
     background-color: #0075b4
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown-title:hover .dropdown-content {
     display: block;
 }
 
-.dropdown:hover {
+.dropdown-title:hover {
     background-color: #0075b4 !important;
     color: #fff !important;
 }
