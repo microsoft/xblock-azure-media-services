@@ -11,3 +11,4 @@ coverage>=4.3.4,<5.0.0
 Django>=1.11,<2.0.0
 
 mock==2.0.0
+requests
