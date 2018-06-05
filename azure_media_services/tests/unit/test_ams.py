@@ -229,7 +229,7 @@ class AMSXBlockTests(unittest.TestCase):
         block = self.make_one()
         embed_url = block.get_embed_url()
         reverse.assert_called_once_with('embed_player', kwargs={'usage_key_string': 'usage_id'})
-        self.assertEqual(embed_url, 'http://lms.com/embed_url/')
+        self.assertEqual(embed_url, 'http://lms.com/embed_url/?embedded=true')
 
     @mock.patch('azure_media_services.ams.reverse', side_effect=NoReverseMatch)
     def test_get_embed_url_NoReverseMatch(self, reverse):

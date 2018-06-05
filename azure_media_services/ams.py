@@ -224,8 +224,8 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         if self.share and not embedded:
             embed_url = self.get_embed_url()
-            if embed_url and (self.share == 'all' and self.runtime.user_id
-                              or self.share == 'staff_only' and self.runtime.user_is_staff):
+            if embed_url and (self.share == 'all' and self.runtime.user_id or
+                              self.share == 'staff_only' and self.runtime.user_is_staff):
                 context.update({
                     "share": True,
                     "embed_url": embed_url
