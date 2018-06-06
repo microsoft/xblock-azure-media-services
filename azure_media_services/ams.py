@@ -128,7 +128,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         values=[
             {"display_name": "Edx - way (footer links)", "value": AssetsMode.edx},
             {"display_name": "Via Player (download dashboard)", "value": AssetsMode.amp},
-            {"display_name": "Combined", "value": AssetsMode.combi},
+            {"display_name": "Combined", "value": AssetsMode.combined},
             {"display_name": "Off", "value": AssetsMode.off},
         ],
         scope=Scope.settings
@@ -213,7 +213,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
             "captions": self.captions,
             "transcripts_enabled": bool(self.transcripts_enabled and self.captions),
             "download_url": self.download_url,
-            "assets_download": self.assets_download in [AssetsMode.edx, AssetsMode.combi],
+            "assets_download": self.assets_download in [AssetsMode.edx, AssetsMode.combined],
             "share": False
         }
 
@@ -269,7 +269,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
                 'transcripts_enabled': context['transcripts_enabled'],
                 'transcripts': self.captions,
                 'video_download_uri': context['download_url'],
-                'assets_download': self.assets_download in [AssetsMode.amp, AssetsMode.combi],
+                'assets_download': self.assets_download in [AssetsMode.amp, AssetsMode.combined],
                 'user_is_authenticated': bool(self.runtime.user_id)
             }
         )

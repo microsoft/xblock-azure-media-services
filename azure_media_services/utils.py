@@ -20,5 +20,5 @@ class AssetsMode(object):
 
     edx = "edx"
     amp = "amp"
-    combi = "combined"
+    combined = "combined"
     off = "off"
