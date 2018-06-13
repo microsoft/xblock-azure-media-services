@@ -265,6 +265,17 @@ Assets (video, transcripts) downloading can be performed in different modes. Cer
 
 Sharing option
 --------------
+
+In order to use xblock’s Sharing feature additional platform changes must be performed:
+- `azure_media_services` app urls must be included both to LMS and CMS`
+
+```
+# lms/urls.py:
+url( r'^azure_media_services_xblock/', include('azure_media_services.urls') ),
+#cms/urls.py:
+url( r'^azure_media_services_xblock/', include('azure_media_services.urls') ),
+```
+
 The video can be shared in standard `embed iframe` way by copying generated html code snippet into the desired environment. By default sharing feature is disabled and it can be configured by corresponding Studio editor control:
 - Off - disabled (default);
 - Staff only - only _staff_ users can see `share` button;
