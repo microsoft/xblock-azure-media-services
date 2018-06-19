@@ -124,12 +124,10 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
     assets_download = String(
         display_name=_("Assets download mode"),
         help=_("Disables completely or enables download controls in xBlock/Player."),
-        default=AssetsMode.edx,
+        default=AssetsMode.off,
         values=[
-            {"display_name": "Edx - way (footer links)", "value": AssetsMode.edx},
-            {"display_name": "Via Player (download dashboard)", "value": AssetsMode.amp},
-            {"display_name": "Combined", "value": AssetsMode.combined},
             {"display_name": "Off", "value": AssetsMode.off},
+            {"display_name": "On", "value": AssetsMode.edx},
         ],
         scope=Scope.settings
     )
@@ -417,4 +415,5 @@ def embed_player(request, usage_key_string):
     if block.share != 'off':
         return render_xblock(request, usage_key_string, check_if_enrolled=False)
 
-    return HttpResponseBadRequest("Embed player is not supported.")
+    template = loader.render_django_template('templates/404.html', {})
+    return HttpResponseBadRequest(template)
