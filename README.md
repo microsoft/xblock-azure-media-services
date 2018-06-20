@@ -1,3 +1,5 @@
+[![Circle CI Build: Status](https://img.shields.io/circleci/project/raccoongang/xblock-azure-media-services/dev.svg)](https://circleci.com/gh/raccoongang/xblock-azure-media-services/tree/dev)
+
 Azure Media Services xBlock
 ===========================
 
@@ -56,11 +58,15 @@ Clicking that xBlock will populate, the Unit with a functional - but unconfigure
 
 ![New Instance](docs/img/new_instance.png)
 
-Click the Edit button in the upper right corner to expose the scrollable setting panel for the xBlock:
+Click the `Edit` button in the upper right corner to expose the scrollable setting panel for the xBlock:
 
 ![Settings1](docs/img/settings1.png)
+
 ![Settings2](docs/img/settings2.png)
+
 ![Settings3](docs/img/settings3.png)
+
+Video URL field may be configured manually (please, see below).
 
 The following is a description of the fields and how to configure them. At a minimum, the courseware author will need to fill in the Video Url to match what Azure Media Services portal says the Publish URL is, for example (old Azure dashboard):
 
@@ -124,7 +130,9 @@ If all is configured correctly - i.e. the verification key, protection type, the
 IMPORTANT: I have noticed some latency for some configuration changes in Azure Media Services to take effect. If protected video playback doesn’t work, wait a few minutes and refresh the page. If it still doesn’t work, carefully inspect all of the values and make sure they match between the Azure portal and the xBlock settings
 
 Working with Transcripts/Subtitles/Captions
------------------------------------------
+-------------------------------------------
+
+    Note: the same files (*.vtt file extension) are used as transcripts, captions, and subtitles.
 
 This version of the Azure Media Services xBlock supports several means to associate text (i.e. dialog) with a video. All text associations with videos uses the WebVTT standard: https://w3c.github.io/webvtt/
 
@@ -132,7 +140,7 @@ This version of the Azure Media Services xBlock supports several means to associ
 
 While subtitles/captions are rendered in the same manner, they are typically targeted to different audiences. Subtitles are typically for translations between languages, but captions are for users who have accessibility needs.
 
-To use subtitles/captions, simply fill in the Captions field inside the xBlock settings panel. Right now the UI is a text field in which the content editor will have to input in a JSON formatted array of dictionaries. This will change into a more user-friendly UI in a subsequent version of the xBlock:
+To use subtitles/captions, simply fill in the `Captions` field inside the xBlock settings panel. Right now the UI is a text field in which the content editor will have to input in a JSON formatted array of dictionaries. This will change into a more user-friendly UI in a subsequent version of the xBlock:
 
 ![Captions Setting](docs/img/captions_setting.png)
 
@@ -174,18 +182,13 @@ Transcripts are very similar to captions/subtitles, but it is designed more for 
 
 Transcript features are part of Open edX and the implementation in the Azure Media Services xBlocks is meant to be a “feature parity” compared to the out-of-the-box video player support in Open edX.
 
-To use transcripts in the Azure Media Services xBlock, in the settings dialog:
+**_Transcripts downloading_**
 
-![Transcript Setting](docs/img/transcript_settings.png)
+If any transcripts available the *downloads button* appears in player's control bar. This button opens *Download dashboard*:
 
-This UI will likely change in a future version of the xBlock. The URL should point to a WebVTT file in a similar manner to the subtitles/captions.
+![Download Dashboard](docs/img/transcripts-download.png)
 
-If configured correctly, the entire WebVTT file will be read and presented in the scrolling region to the right of the video player. When the video plays, you will notice that the current text associated with the video track will be highlighted. You will see something like:
-
-![Transcripts](docs/img/transcripts.png)
-
-The viewer can click on any piece of the transcript text and the video player will seek to the time associated to that portion of the clicked transcript.
-
+To download desired transcript file one must choose 'Transcript' (asset type to download), pick the language and hit the Download button.
 
 Analytic Events
 ---------------
@@ -214,3 +217,59 @@ edx.video.language_menu.hidden
 edx.video.language_menu.shown
 ```
 
+
+Automatic way to configure Video URL
+------------------------------------
+Before use this way, please be sure that you configure the following settings https://github.com/raccoongang/edx-platform/blob/oxa/video/cms/djangoapps/azure_video_pipeline/README.md
+
+The simplest way to configure Video URL lays within `MANAGEMENT` tab.
+
+![Management tab](docs/img/management-tab.png)
+
+All is needed is to open `MANAGEMENT` tab and pick the video file from the list of available ones on the left panel.
+
+![Management: available videos](docs/img/management-tab-videos-list.png)
+
+As soon as the video is selected the list of available transcripts (captions) appears on the right panel. Initially, all transcripts are unchecked. To enable certain transcript its checkbox should be checked.
+
+![Management: available videos](docs/img/management-tab-transcripts-list.png)
+
+
+Working with Transcripts/Subtitles/Captions
+-------------------------------------------
+If Video URL field was configured via `MANAGEMENT` tab `Captions` field should be already filled.
+To enable transcripts player control in the Azure Media Services xBlock, turn on the boolean `Transcripts enabled` field:
+
+
+![Transcript Setting](docs/img/transcripts-switch.png)
+
+If transcripts feature is enabled new `TRANSCRIPTS` control  and transcripts download links appear in the Player.
+
+![Transcript Setting](docs/img/transcritps-controls.png)
+
+If configured correctly, the entire WebVTT file will be read and presented in the scrolling region to the right of the video player. When the video plays, you will notice that the current text associated with the video track will be highlighted. The viewer can click on any piece of the transcript text and the video player will seek to the time associated to that portion of the clicked transcript.
+
+
+Assets downloading
+------------------
+Assets (video, transcripts) downloading can be performed in different modes. Certain download mode is configured in Studio editor by setting `Assets download mode` switch field:
+- Edx-way (footer links) - (default) only footer download buttons are shown beneath the Player;
+- Via Player (download dashboard) - only download player's control button is available;
+- Combined - first two options enabled simultaneously;
+- Off - assets downloading disabled.
+
+![Download modes](docs/img/download-modes.png)
+
+![Assets downloading](docs/img/assets-downloading.png)
+
+
+Sharing option
+--------------
+The video can be shared in standard `embed iframe` way by copying generated html code snippet into the desired environment. By default sharing feature is disabled and it can be configured by corresponding Studio editor control:
+- Off - disabled (default);
+- Staff only - only _staff_ users can see `share` button;
+- All - sharing is available for everyone.
+
+![Video share](docs/img/video-share.png)
+
+![Share popup](docs/img/share-popup.png)
