@@ -1,0 +1,18 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "./node_modules/eslint-config-edx-es5/.eslintrc.json"
+  ],
+  "rules": {
+    "require-jsdoc": [
+      "error",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true
+        }
+      }
+    ]
+  }
+}
