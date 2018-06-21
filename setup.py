@@ -30,15 +30,19 @@ setup(
     packages=[
         'azure_media_services',
     ],
+    include_package_data=True,
+    dependency_links=[
+        # At the moment of writing PyPI hosts outdated version of xblock-utils, hence git
+        # Replace dependency links with numbered versions when it's released on PyPI
+        'git+https://github.com/edx/xblock-utils.git@v1.0.5#egg=xblock-utils==1.0.5',
+    ],
     install_requires=[
         'PyJWT',
         'bleach',
         'mako',
-        'XBlock',
-        'xblock-utils>=v1.0.0',
-    ],
-    dependency_links=[
-        'https://github.com/edx/xblock-utils/tarball/c39bf653e4f27fb3798662ef64cde99f57603f79#egg=xblock-utils',
+        'requests>=2.9.1,<3.0.0',
+        'XBlock>=0.4.10,<2.0.0',
+        'xblock-utils>=1.0.2,<=1.0.5',
     ],
     entry_points={
         'xblock.v1': [
@@ -47,3 +51,4 @@ setup(
     },
     package_data=package_data("azure_media_services", ["static", "templates", "public", "translations"]),
 )
+

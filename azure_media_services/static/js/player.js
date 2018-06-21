@@ -1,260 +1,174 @@
 // Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT license. See LICENSE file on the project webpage for details.
 
-function AzureMediaServicesBlock(runtime, container) {
-  //
-  // IMPORTANT: We pass the <video> DOM element instead of its class or id. This mitigates
-  //  a bug when switching units. Changing units triggers a "partial navigation" which
-  //  entirely removes the xblock markup from the DOM.
-  //
-  var player = amp($(container).find('video')[0], null, function() {
-    // Preserve
-    var self = this;
+/* global _ amp gettext runtime */
 
-    // Fyi, container contains all of player.html so it is an ancestor of $vidAndTranscript
-    //      $vidAndTranscript is an ancestor of BOTH $vidParent AND $transcriptElement
-    //      $vidParent is the direct parent of <video> tag
-    var $vidAndTranscript = $(container).find('.video').first();
-    var $vidParent = $(self.el_);
-    var $transcriptElement = $vidAndTranscript.find('.subtitles').first();
 
-    // This will get filled in by the transcript processor
-    var transcript_cues = null;
+var events = {
+    PLAYED: 'edx.video.played',
+    PAUSED: 'edx.video.paused',
+    STOPPED: 'edx.video.stopped',
+    POSITION_CHANGED: 'edx.video.position.changed',
+    TRANSCRIPT_SHOWN: 'edx.video.transcript.show',
+    TRANSCRIPTS_HIDDEN: 'edx.video.transcript.hidden',
+    VIDEO_LOADED: 'edx.video.loaded',
+    CAPTIONS_SHOWN: 'edx.video.closed_captions.shown',
+    CAPTIONS_HIDDEN: 'edx.video.closed_captions.hidden'
+};
 
-    // Clear fixed width to support responsive UX.
-    $vidParent.css('width', '');
 
-    // Add event handlers
-    var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
+/**
+ * Send events back to server-side xBlock
+ * @param eventPostUrl
+ * @param name
+ * @param data
+ * @param userIsAuthenticated
+ */
+function sendPlayerEvent(eventPostUrl, name, data, userIsAuthenticated) {
+    'use strict';
+    if (userIsAuthenticated) {
+        data.event_type = name;  // eslint-disable-line no-param-reassign
+        $.ajax({
+            type: 'POST',
+            url: eventPostUrl,
+            data: JSON.stringify(data)
+        });
+    }
+}
 
-    // This will be updated as the video plays.
-    var timeHandler = null;
 
-    this.addEventListener(amp.eventName.pause,
-      function(evt) {
-        _sendPlayerEvent(eventPostUrl, 'edx.video.paused', {});
+/**
+ * Main xBlock initializer which interface is defined by xBlock API.
+ * @param runtime
+ * @param container
+ * @param jsonArgs
+ * @constructor
+ */
+function AzureMediaServicesBlock(runtime, container, jsonArgs) {
+    'use strict';
+    // IMPORTANT: We pass the <video> DOM element instead of its class or id. This mitigates
+    //  a bug when switching units. Changing units triggers a "partial navigation" which
+    //  entirely removes the xblock markup from the DOM.
+    var downloadMediaList = [];
+    var langSource;
+    var $sharePopup = $(container).find('.js-share-popup');
+    var $ddlSizeEmbed = $(container).find('#ddlSizeEmbed');
+    var $txtContentEmbed = $(container).find('#txtContentEmbed');
 
-        if (timeHandler !== null) {
-          clearInterval(timeHandler);
-        }
-      }
-    );
+    var player = amp($(container).find('.xblock-video-amp')[0], null, function() { // eslint-disable-line no-unused-vars
+        var subtitleEls;
+        var languageName;
+        var eventPostUrl = runtime.handlerUrl(container, 'publish_event');
+        var userIsAuthenticated = jsonArgs.user_is_authenticated;
 
-    this.addEventListener(amp.eventName.play,
-      function(evt) {
-        _sendPlayerEvent(eventPostUrl, 'edx.video.played', {});
-
-        timeHandler = setInterval(
-          function() {
-            _syncTimer(self, transcript_cues, $transcriptElement);
-          },
-          100
+        // Add event handlers:
+        this.addEventListener(amp.eventName.pause,
+            function() {
+                sendPlayerEvent(eventPostUrl, events.PAUSED, {}, userIsAuthenticated);
+            }
         );
-      }
-    );
 
-    this.addEventListener(amp.eventName.loadeddata,
-      function(evt) {
-        if ($transcriptElement.length) {
-          // Find and re-position button markup. This must be done
-          // after AMP initializes built-in player controls.
-          var $transcriptButton = $transcriptElement.find('.toggleTranscript').first();
-          $vidParent.find('.amp-controlbaricons-right').first().append($transcriptButton);
-
-          // Enable button action.
-          $transcriptButton.on('click keydown', (function(evt) {
-            var keycode = (evt.type === 'keydown' && evt.keycode ? evt.keyCode : evt.which) 
-            if (evt.type !== 'click' && (keycode !== 32 && keycode !== 13)) {
-              return;
+        this.addEventListener(amp.eventName.play,
+            function() {
+                sendPlayerEvent(eventPostUrl, events.PLAYED, {}, userIsAuthenticated);
             }
-            if (keycode === 32) {
-              evt.preventDefault();
+        );
+
+        this.addEventListener(amp.eventName.loadeddata,
+            function() {
+                sendPlayerEvent(eventPostUrl, events.VIDEO_LOADED, {}, userIsAuthenticated);
+            }
+        );
+
+        this.addEventListener(amp.eventName.seeked,
+            function() {
+                sendPlayerEvent(eventPostUrl, events.POSITION_CHANGED, {}, userIsAuthenticated);
+            }
+        );
+
+        this.addEventListener(amp.eventName.ended,
+            function() {
+                sendPlayerEvent(eventPostUrl, events.STOPPED, {}, userIsAuthenticated);
+            }
+        );
+
+        // Log when closed captions (subtitles) are toggled.
+        // NOTE we use classes from Azure Media Player which may change.
+        subtitleEls = $(container).find('.vjs-subtitles-button .vjs-menu-item');
+
+        subtitleEls.mousedown(function(evt) {
+            var reportEvent = events.CAPTIONS_SHOWN;
+            // TODO: we should attach to a different event.
+            // For example, this can also be toggled via keyboard.
+            languageName = $(evt.target).html();
+            if (languageName === 'Off') {
+                reportEvent = events.CAPTIONS_HIDDEN;
+                languageName = '';
             }
 
-            // Toggle transcript view.
-            var event_type = ''
-            if ($vidAndTranscript.hasClass('closed')) {
-              event_type = 'edx.video.transcript.show';
-              $vidAndTranscript.removeClass('closed')
-            } else {
-              event_type = 'edx.video.transcript.hidden';
-              $vidAndTranscript.addClass('closed')
-            }
-
-            // Log toggle transcript event.
-            _sendPlayerEvent(eventPostUrl, event_type, {});
-          }));
-        }
-
-        _sendPlayerEvent(eventPostUrl, 'edx.video.loaded', {});
-      }
-    );
-
-    this.addEventListener(amp.eventName.seeked,
-      function(evt) {
-        _sendPlayerEvent(eventPostUrl, 'edx.video.position.changed', {});
-      }
-    );
-
-    this.addEventListener(amp.eventName.ended,
-      function(evt) {
-        _sendPlayerEvent(eventPostUrl, 'edx.video.stopped', {});
-
-        if (timeHandler !== null) {
-          clearInterval(timeHandler);
-        }
-      }
-    );
-
-    // Ajax request for transcript file.
-    if ($transcriptElement.length) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', $transcriptElement.data('transcript-url'));
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          // Parse transcript.
-          transcript_cues = initTranscript(self, xhr.responseText, $transcriptElement);
-        }
-      };
-      xhr.send();
-    }
-
-    // Log when closed captions (subtitles) are toggled.
-    // NOTE we use classes from Azure Media Player which may change.
-    var subtitle_els = $(container).find('.vjs-subtitles-button .vjs-menu-item');
-
-    subtitle_els.mousedown(function(evt) {
-      // TODO: we should attach to a different event. For example, this can also be toggled via keyboard.
-      var target = $(evt.target);
-      var language_name = target.html();
-      var event_type = 'edx.video.closed_captions.shown';
-      if (language_name == 'Off') {
-        event_type = 'edx.video.closed_captions.hidden';
-        language_name = '';
-      }
-
-      _sendPlayerEvent(eventPostUrl, event_type, { language_name: language_name });
+            sendPlayerEvent(eventPostUrl, reportEvent, {language_name: languageName}, userIsAuthenticated);
+        });
     });
-  });
-}
 
-function initTranscript(player, transcript, $transcriptElement) {
-  var parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+    player.transcriptsAmpPlugin({hidden: !jsonArgs.transcripts_enabled});
 
-  var cues = [];
-  var regions = [];
-
-  parser.oncue = function(cue) {
-    cues.push(cue);
-  };
-  parser.onregion = function(region) {
-    regions.push(region);
-  }
-  parser.onparsingerror = function(error) {
-    console.log(error);
-  }
-
-  try {
-    parser.parse(transcript);
-  }
-  catch (error) {
-    // TODO: remove when vtt bug is fixed.
-    $transcriptElement.append('<span><p>It appears there was a problem loading the transcript. Please see the support link located at the bottom of this page for additional help and information about browser compatibility. We apologize for the inconvenience.</p></span>');
-  }
-  parser.flush();
-
-  // Creates transcript markup.
-  // TODO: use Backbone's client-side templating view (underscore)
-  var html = '<ol class="subtitles-menu" style="list-style:none; padding:5em 0;">';
-  for (var i = 0; i < cues.length; i++) {
-    var cue = cues[i];
-
-    html += '<li role="link" tabindex="0"'
-      + 'data-transcript-element-start-time="' + _.escape(cue.startTime)
-      + '" class="azure-media-xblock-transcript-element" >'
-      + _.escape(cue.text) + '</li>';
-  }
-  html += '</ol>';
-  $transcriptElement.append(html);
-
-  // Gather each transcript phrase (each pseudo-hyperlink in transcript).
-  var $transcriptItems = $transcriptElement.find('.azure-media-xblock-transcript-element');
-
-  // Handle events when user clicks on transcripts
-  $transcriptItems.on('click keypress',function(evt) {
-    var KeyCode = (evt.type === 'keydown' && evt.keyCode ? evt.keyCode : evt.which)
-    if (evt.type !== 'click' && (KeyCode !== 32 && KeyCode !== 13)) {
-      return;
-    }
-    if (KeyCode === 32) {
-      evt.preventDefault();
+     /**
+     * Create a value for the txtContentEmbed field
+     */
+    function getContentEmbed() {
+        var embedUrl = $txtContentEmbed.data('url');
+        var width = $ddlSizeEmbed.find('option:selected').data('width');
+        var height = $ddlSizeEmbed.find('option:selected').data('height');
+        var iframeEmbed =
+        _.template(
+            '<iframe src="<%= embedUrl %>" width="<%= width %>" height="<%= height %>" ' +
+            'allowFullScreen frameBorder="0"></iframe>'
+        )({
+            embedUrl: embedUrl,
+            width: width,
+            height: height
+        });
+        return iframeEmbed;
     }
 
-    // Clear all active
-    $transcriptItems.removeClass('current');
+    $(container).find('.js-share-button').on('click', function(event) {
+        event.preventDefault();
+        $sharePopup.toggleClass('is-hidden');
+        if (!$txtContentEmbed.val()) {
+            $txtContentEmbed.val(getContentEmbed());
+        }
+    });
 
-    // Highlight the one the user clicked.
-    $(evt.target).addClass('current');
+    $ddlSizeEmbed.on('change', function() {
+        $txtContentEmbed.val(getContentEmbed());
+    });
 
-    // Set the player to match the transcript time
-    var start_time = parseFloat($(evt.target).data('transcript-element-start-time'));
-    player.currentTime(start_time);
-  })
+    // Do not perform further media download processing if disabled:
+    if (!jsonArgs.assets_download) return;
 
-  return cues;
-}
-
-function _syncTimer(player, transcript_cues, $transcriptElement) {
-  // This is called regularly while the video plays
-  // so that we can correctly highlight the transcript elements
-  // based on the current position of the video playback
-
-  if (transcript_cues === null || !$transcriptElement.length) {
-    // no transcript - quick exit
-    return;
-  }
-
-  // Gather each transcript phrase (each pseudo-hyperlink in transcript).
-  var $transcriptItems = $transcriptElement.find('.azure-media-xblock-transcript-element');
-
-  var currentTime = player.currentTime();
-
-  // Simple linear search.
-  for (var i = 0; i < transcript_cues.length; i++) {
-    cue = transcript_cues[i];
-
-    if (currentTime >= cue.startTime && currentTime < cue.endTime) {
-      var $targetElement = $transcriptItems.eq(i);
-
-      var isActive = $targetElement.hasClass('current');
-      if (!isActive) {
-        // Highlight the correct one
-        $transcriptItems.removeClass('current');
-        $targetElement.addClass('current');
-
-        // Autoscroll.
-        // TODO: this formula is brittle. It uses "magic numbers." It should instead use
-        //    information from the layout like: $transcriptElement's height,
-        //    $transcriptElement's scroll-position, $targetElement's location, etc.
-        $transcriptElement.scrollTo((i + 1) * 29.5, 1000);
-      }
-
-      return;
+    // xBlock's Studio editor has switch control for transcripts download button:
+    if (jsonArgs.transcripts_enabled) {
+        for (var i = 0; i < jsonArgs.transcripts.length; i++) { // eslint-disable-line vars-on-top
+            downloadMediaList.push({
+                lang: jsonArgs.transcripts[i].srclang,
+                type: amp.downloadableMediaType.transcript,
+                uri: jsonArgs.transcripts[i].src
+            });
+        }
     }
-  }
-}
 
-function _sendPlayerEvent(eventPostUrl, name, data) {
-  data['event_type'] = name;
+    langSource = downloadMediaList.length
+        ? downloadMediaList.slice()
+        : [{lang: player.language()}];
 
-  // @TODO: Remove this debugging stuff
-  console.log('Event: ' + name)
-  console.log(data)
+    // Here we take care video download is available for all presented locales:
+    langSource.forEach(function(media) {
+        downloadMediaList.push({
+            lang: media.lang,
+            type: amp.downloadableMediaType.video,
+            uri: jsonArgs.video_download_uri
+        });
+    });
 
-  // send events back to server-side xBlock
-  $.ajax({
-    type: "POST",
-    url: eventPostUrl,
-    data: JSON.stringify(data)
-  });
+    player.downloadableMedia(downloadMediaList);
 }
