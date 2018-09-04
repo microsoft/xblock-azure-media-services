@@ -221,7 +221,9 @@
         var $transcriptItems;
         var cues = track.cues;
         var $html = $('<ul class="subtitles-menu"></ul>');
-
+        if(track.language == 'ar'){
+            $html = $('<ul class="subtitles-menu" style="text-align:right;"></ul>');
+        }
         for (var i = 0; i < cues.length; i++) { // eslint-disable-line vars-on-top
             cue = cues[i];
             cueComponent = new CueItem(player, {
