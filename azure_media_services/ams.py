@@ -141,8 +141,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         display_name=_("Share the video"),
         values=(
             {'display_name': _("Off"), "value": 'off'},
-            {'display_name': _("Staff only"), "value": "staff_only"}
-            # {'display_name': _("All"), "value": "all"}
+            {'display_name': _("On"), "value": "staff_only"}
         ),
         default='off',
         scope=Scope.settings
