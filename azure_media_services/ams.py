@@ -141,8 +141,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
         display_name=_("Share the video"),
         values=(
             {'display_name': _("Off"), "value": 'off'},
-            {'display_name': _("Staff only"), "value": "staff_only"},
-            {'display_name': _("All"), "value": "all"}
+            {'display_name': _("On"), "value": "staff_only"}
         ),
         default='off',
         scope=Scope.settings
@@ -222,8 +221,7 @@ class AMSXBlock(StudioEditableXBlockMixin, XBlock):
 
         if self.share and not embedded:
             embed_url = self.get_embed_url()
-            if embed_url and (self.share == 'all' and self.runtime.user_id or
-                              self.share == 'staff_only' and self.runtime.user_is_staff):
+            if embed_url and (self.share == 'staff_only' and self.runtime.user_is_staff):
                 context.update({
                     "share": True,
                     "embed_url": embed_url
