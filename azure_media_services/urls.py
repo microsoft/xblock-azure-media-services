@@ -4,8 +4,6 @@ from django.conf.urls import url
 
 
 urlpatterns = (
-    "",
-    
     url(
         r'^{usage_key_string}$'.format(usage_key_string=settings.USAGE_KEY_PATTERN),
         embed_player,
